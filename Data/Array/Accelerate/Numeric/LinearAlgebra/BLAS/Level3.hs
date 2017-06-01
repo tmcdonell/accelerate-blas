@@ -63,31 +63,28 @@ gemm alpha opA matA opB matB =
       = fold (+) 0
       $ zipWith (\a b -> alpha * a * b) arrRepl brrRepl
       where
-        arr'  = apply  opA arr
-        brr'  = apply  opB brr
-        brr'T = applyT opB brr
-
-        Z :. rowsA :. _     = unlift (shape arr')  :: Z :. Exp Int :. Exp Int
-        Z :. _     :. colsB = unlift (shape brr')  :: Z :. Exp Int :. Exp Int
+        Z :. rowsA :. _ = unlift (shape arr') :: Z :. Exp Int :. Exp Int
+        Z :. colsB :. _ = unlift (shape brr') :: Z :. Exp Int :. Exp Int
         --
-        arrRepl             = replicate (lift $ Z :. All   :. colsB :. All) arr'
-        brrRepl             = replicate (lift $ Z :. rowsA :. All   :. All) brr'T
+        arrRepl         = replicate (lift $ Z :. All   :. colsB :. All) arr'
+        brrRepl         = replicate (lift $ Z :. rowsA :. All   :. All) brr'
 
-        apply :: Transpose -> Acc (Matrix e) -> Acc (Matrix e)
-        apply op mat = case op of
-                         N -> mat
-                         T -> transpose mat
-                         H -> case numericR :: NumericR e of
-                                NumericRcomplex32 -> map conjugate (transpose mat)
-                                NumericRcomplex64 -> map conjugate (transpose mat)
-                                _                 -> transpose mat
+        -- apply opA
+        arr' = case opA of
+                 N -> arr
+                 T -> transpose arr
+                 H -> case numericR :: NumericR e of
+                        NumericRcomplex32 -> map conjugate (transpose arr)
+                        NumericRcomplex64 -> map conjugate (transpose arr)
+                        _                 -> transpose arr
 
-        applyT :: Transpose -> Acc (Matrix e) -> Acc (Matrix e)
-        applyT op mat = case op of
-                          N -> transpose mat
-                          T -> mat
-                          H -> case numericR :: NumericR e of
-                                 NumericRcomplex32 -> map conjugate mat
-                                 NumericRcomplex64 -> map conjugate mat
-                                 _                 -> mat
+        -- apply opB and transpose at the same time, which is required for this
+        -- algorithm
+        brr' = case opB of
+                 N -> transpose brr
+                 T -> brr
+                 H -> case numericR :: NumericR e of
+                        NumericRcomplex32 -> map conjugate brr
+                        NumericRcomplex64 -> map conjugate brr
+                        _                 -> brr
 
