@@ -69,8 +69,8 @@ infixr 8 ><
 (><) :: Numeric e => Acc (Vector e) -> Acc (Vector e) -> Acc (Matrix e)
 (><) x y = xc <> yr
   where
-    xc = reshape (lift (Z :. length x :. constant 1) :: Exp DIM2) x
-    yr = reshape (lift (Z :. constant 1 :. length y) :: Exp DIM2) y
+    xc = reshape (index2 (length x) 1) x
+    yr = reshape (index2 1 (length y)) y
 
 
 -- Level 2
