@@ -18,6 +18,14 @@ build-type:             Simple
 extra-source-files:     ChangeLog.md
 cabal-version:          >=1.10
 
+Flag llvm-cpu
+  Description:          Enable the LLVM backend for multicore CPUs
+  Default:              False
+
+Flag llvm-ptx
+  Description:          Enable the LLVM PTX backend for NVIDIA GPUs
+  Default:              False
+
 
 library
   default-language:     Haskell2010
@@ -33,5 +41,16 @@ library
   build-depends:
           base                          >= 4.7 && < 4.11
         , accelerate                    == 1.0.*
+
+  if flag(llvm-cpu)
+    CPP-options:        -DACCELERATE_LLVM_NATIVE_BACKEND
+    build-depends:
+        accelerate-llvm-native          == 1.0.*
+      , hblas                           >= 0.4
+      , vector                          >= 0.10
+
+    other-modules:
+      Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
+      Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level3
 
 -- vim: nospell

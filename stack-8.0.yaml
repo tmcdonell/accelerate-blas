@@ -8,6 +8,15 @@ packages:
 
 extra-deps:
 - 'accelerate-1.0.0.0'
+- 'accelerate-llvm-1.0.0.0'
+- 'accelerate-llvm-native-1.0.0.0'
+- 'accelerate-llvm-ptx-1.0.0.0'
+- 'chaselev-deque-0.5.0.5'
+- 'cuda-0.7.5.3'
+- 'hblas-0.4.0.0'
+- 'libffi-0.1'
+- 'llvm-hs-4.0.1.0'
+- 'llvm-hs-pure-4.0.0.0'
 - 'unique-0'
 
 # Override default flag values for local packages and extra-deps
@@ -18,6 +27,16 @@ flags:
     debug: true
     ekg: false
     internal-checks: false
+  accelerate-llvm-native:
+    debug: true
+  accelerate-llvm-ptx:
+    debug: true
+    nvvm:  false
+  accelerate-blas:
+    llvm-cpu: true
+    llvm-ptx: false
+  llvm-hs:
+    shared-llvm: true
 
 # Extra package databases containing global packages
 extra-package-dbs: []
