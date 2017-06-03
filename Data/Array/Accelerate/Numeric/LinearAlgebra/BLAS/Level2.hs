@@ -1,8 +1,10 @@
+{-# LANGUAGE CPP                 #-}
 {-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE GADTs               #-}
 {-# LANGUAGE NoImplicitPrelude   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE ViewPatterns        #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level2
 -- Copyright   : [2017] Trevor L. McDonell
@@ -26,8 +28,13 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level2 (
 ) where
 
 import Data.Array.Accelerate                                        as A
+import Data.Array.Accelerate.Smart                                  as A
 import Data.Array.Accelerate.Data.Complex                           as A
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
+
+#ifdef ACCELERATE_LLVM_NATIVE_BACKEND
+import qualified Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level2 as CPU
+#endif
 
 
 -- | Computes the matrix-vector product of a general matrix.
@@ -44,9 +51,14 @@ gemv :: forall e. Numeric e
      -> Acc (Matrix e)        -- ^ A
      -> Acc (Vector e)        -- ^ x
      -> Acc (Vector e)        -- ^ y
-gemv alpha opA matA x =
-  matA `mXv` x
+gemv alpha opA matA x = go (lift (unit alpha, matA, x))
   where
+    go =
+#ifdef ACCELERATE_LLVM_NATIVE_BACKEND
+      foreignAcc (CPU.gemv opA) $
+#endif
+      (\(unatup3 -> (_, arr, brr)) -> mXv arr brr)
+
     -- General matrix-vector multiply in pure Accelerate. This is probably not
     -- efficient.
     --

@@ -28,7 +28,7 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level3 (
 ) where
 
 import Data.Array.Accelerate                                        as A
-import Data.Array.Accelerate.Smart
+import Data.Array.Accelerate.Smart                                  as A
 import Data.Array.Accelerate.Data.Complex                           as A
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 

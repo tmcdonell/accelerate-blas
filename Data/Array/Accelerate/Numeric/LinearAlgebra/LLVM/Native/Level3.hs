@@ -10,11 +10,8 @@
 -- Portability : non-portable (GHC extensions)
 --
 
-module Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level3 (
-
-  gemm,
-
-) where
+module Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level3
+  where
 
 import Data.Array.Accelerate                                        as A
 import Data.Array.Accelerate.LLVM.Native.Foreign
@@ -24,7 +21,10 @@ import Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
 import qualified Numerical.HBLAS.BLAS.Level3                        as H
 
 
-gemm :: forall e. Numeric e => Transpose -> Transpose -> ForeignAcc ((Scalar e, Matrix e, Matrix e) -> Matrix e)
+gemm :: forall e. Numeric e
+     => Transpose
+     -> Transpose
+     -> ForeignAcc ((Scalar e, Matrix e, Matrix e) -> Matrix e)
 gemm opA opB = ForeignAcc "cblas.gemm" gemm'
   where
     gemm' (alpha, matA, matB) = do
@@ -51,6 +51,6 @@ gemm opA opB = ForeignAcc "cblas.gemm" gemm'
           case numericR :: NumericR e of
             NumericRfloat32   -> H.sgemm opA' opB' alpha' 0 matA' matB' matC' >> return matC
             NumericRfloat64   -> H.dgemm opA' opB' alpha' 0 matA' matB' matC' >> return matC
-            NumericRcomplex32 -> H.cgemm opA' opB' alpha' 0 matA' matB' matC' >> return matC
-            NumericRcomplex64 -> H.zgemm opA' opB' alpha' 0 matA' matB' matC' >> return matC
+            -- NumericRcomplex32 -> H.cgemm opA' opB' alpha' 0 matA' matB' matC' >> return matC
+            -- NumericRcomplex64 -> H.zgemm opA' opB' alpha' 0 matA' matB' matC' >> return matC
 

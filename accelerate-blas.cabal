@@ -51,6 +51,7 @@ library
 
     other-modules:
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
+      Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level2
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level3
 
 -- vim: nospell

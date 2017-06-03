@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE GADTs               #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 -- |
@@ -30,6 +31,17 @@ encodeTranspose :: Transpose -> H.Transpose
 encodeTranspose N = H.NoTranspose
 encodeTranspose T = H.Transpose
 encodeTranspose H = H.ConjTranspose
+
+
+withVector
+    :: forall e a. Numeric e
+    => Vector e
+    -> (H.MDenseVector RealWorld 'H.Direct e -> IO a)
+    -> IO a
+withVector (Array ((),n) adata) go =
+  case (numericR :: NumericR e, adata) of
+    (NumericRfloat32, AD_Float  (UniqueArray _ ua)) -> withLifetime ua (\fp -> go (H.MutableDenseVector H.SDirect n 1 (S.MVector n fp)))
+    (NumericRfloat64, AD_Double (UniqueArray _ ua)) -> withLifetime ua (\fp -> go (H.MutableDenseVector H.SDirect n 1 (S.MVector n fp)))
 
 
 withMatrix
