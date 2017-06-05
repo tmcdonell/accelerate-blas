@@ -61,7 +61,7 @@ data Orientation
   = R -- ^ row major
   | C -- ^ column major
 
--- | Many Operations allow you to implicitly transpose the arguments. For
+-- | Many operations allow you to implicitly transpose the arguments. For
 -- a given input matrix @mat@ with dimensions @Z :. m :. n@ (that is; @m@ rows
 -- and @n@ columns):
 --
