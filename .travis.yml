@@ -31,6 +31,7 @@ addons:
       - happy-1.19.5
       - alex-3.1.7
       - llvm-4.0-dev
+      - libblas-dev
 
 matrix:
   include:
