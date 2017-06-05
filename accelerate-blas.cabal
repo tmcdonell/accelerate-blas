@@ -51,6 +51,16 @@ library
     build-depends:
         accelerate-llvm-native          == 1.0.*
       , blas-hs                         >= 0.1
+      , storable-complex                >= 0.2
+
+    cc-options:
+      -O3
+      -Wall
+      -march=native
+
+    c-sources:
+      cbits/twine_f32.c
+      cbits/twine_f64.c
 
     other-modules:
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
