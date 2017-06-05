@@ -18,13 +18,14 @@ import Data.Array.Accelerate.LLVM.Native.Foreign
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 import Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
 
-import qualified Numerical.HBLAS.BLAS.Level2                        as H
+import qualified Blas.Primitive.Types                               as C
+import qualified Blas.Primitive.Unsafe                              as C
 
 
 gemv :: forall e. Numeric e
      => Transpose
      -> ForeignAcc ((Scalar e, Matrix e, Vector e) -> Vector e)
-gemv opA = ForeignAcc "cblas.gemv" gemv'
+gemv opA = ForeignAcc "native.gemv" gemv'
   where
     gemv' (alpha, matA, vecx) = do
       let
@@ -37,11 +38,13 @@ gemv opA = ForeignAcc "cblas.gemv" gemv'
                       _ -> colsA
       --
       vecy  <- allocateRemote (Z :. leny) :: LLVM Native (Vector e)
-      liftIO $ do
-       withMatrix matA   $ \matA' -> do
-        withVector vecx  $ \vecx' -> do
-         withVector vecy $ \vecy' -> do
-           case numericR :: NumericR e of
-             NumericRfloat32  -> H.sgemv opA' alpha' 0 matA' vecx' vecy' >> return vecy
-             NumericRfloat64  -> H.dgemv opA' alpha' 0 matA' vecx' vecy' >> return vecy
+      ()    <- liftIO $ do
+        withArray matA   $ \ptr_A -> do
+         withArray vecx  $ \ptr_x -> do
+          withArray vecy $ \ptr_y -> do
+            case numericR :: NumericR e of
+              NumericRfloat32  -> C.sgemv C.RowMajor opA' rowsA colsA alpha' ptr_A colsA ptr_x 1 0 ptr_y 1
+              NumericRfloat64  -> C.dgemv C.RowMajor opA' rowsA colsA alpha' ptr_A colsA ptr_x 1 0 ptr_y 1
+        --
+      return vecy
 

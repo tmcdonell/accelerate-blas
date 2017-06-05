@@ -18,39 +18,43 @@ import Data.Array.Accelerate.LLVM.Native.Foreign
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 import Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
 
-import qualified Numerical.HBLAS.BLAS.Level3                        as H
+import qualified Blas.Primitive.Types                               as C
+import qualified Blas.Primitive.Unsafe                              as C
 
 
 gemm :: forall e. Numeric e
      => Transpose
      -> Transpose
      -> ForeignAcc ((Scalar e, Matrix e, Matrix e) -> Matrix e)
-gemm opA opB = ForeignAcc "cblas.gemm" gemm'
+gemm opA opB = ForeignAcc "native.gemm" gemm'
   where
     gemm' (alpha, matA, matB) = do
       let
           Z :. rowsA :. colsA = arrayShape matA
           Z :. rowsB :. colsB = arrayShape matB
 
-          rowsC   = case opA of
-                      N -> rowsA
-                      _ -> colsA
-          colsC   = case opB of
+          (m,k)   = case opA of
+                      N -> (rowsA, colsA)
+                      _ -> (colsA, rowsA)
+          n       = case opB of
                       N -> colsB
                       _ -> rowsB
+
+          lda     = colsA
+          ldb     = colsB
 
           opA'    = encodeTranspose opA
           opB'    = encodeTranspose opB
           alpha'  = indexArray alpha Z
       --
-      matC  <- allocateRemote (Z :. rowsC :. colsC) :: LLVM Native (Matrix e)
-      liftIO $ do
-       withMatrix matA   $ \matA' -> do
-        withMatrix matB  $ \matB' -> do
-         withMatrix matC $ \matC' -> do
-          case numericR :: NumericR e of
-            NumericRfloat32   -> H.sgemm opA' opB' alpha' 0 matA' matB' matC' >> return matC
-            NumericRfloat64   -> H.dgemm opA' opB' alpha' 0 matA' matB' matC' >> return matC
-            -- NumericRcomplex32 -> H.cgemm opA' opB' alpha' 0 matA' matB' matC' >> return matC
-            -- NumericRcomplex64 -> H.zgemm opA' opB' alpha' 0 matA' matB' matC' >> return matC
+      matC  <- allocateRemote (Z :. m :. n) :: LLVM Native (Matrix e)
+      ()    <- liftIO $ do
+        withArray matA   $ \ptr_A -> do
+         withArray matB  $ \ptr_B -> do
+          withArray matC $ \ptr_C -> do
+            case numericR :: NumericR e of
+              NumericRfloat32  -> C.sgemm C.RowMajor opA' opB' m n k alpha' ptr_A lda ptr_B ldb 0 ptr_C n
+              NumericRfloat64  -> C.dgemm C.RowMajor opA' opB' m n k alpha' ptr_A lda ptr_B ldb 0 ptr_C n
+      --
+      return matC
 

@@ -39,15 +39,18 @@ library
     Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 
   build-depends:
-          base                          >= 4.7 && < 4.11
-        , accelerate                    == 1.0.*
+        base                            >= 4.7 && < 4.11
+      , accelerate                      == 1.0.*
+
+  ghc-options:
+      -O2
+      -Wall
 
   if flag(llvm-cpu)
     CPP-options:        -DACCELERATE_LLVM_NATIVE_BACKEND
     build-depends:
         accelerate-llvm-native          == 1.0.*
-      , hblas                           >= 0.4
-      , vector                          >= 0.10
+      , blas-hs                         >= 0.1
 
     other-modules:
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
