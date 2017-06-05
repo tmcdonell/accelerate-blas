@@ -1,5 +1,7 @@
 # Numeric linear algebra in Accelerate
 
+[![Build Status](https://travis-ci.org/tmcdonell/accelerate-blas.svg?branch=master)](https://travis-ci.org/tmcdonell/accelerate-blas)
+
 Linear systems, matrix decompositions, and other numerical computations for use
 in Accelerate. Most operations are implemented efficiently via FFI calls to BLAS
 and LAPACK. For details on Accelerate, refer to the [main repository][GitHub].
@@ -13,7 +15,7 @@ for setup details.
 
 ## accelerate-llvm-ptx
 
-FFI bindings to [cuBLAS].
+FFI bindings to [cuBLAS]. TBD.
 
 
   [GitHub]:     https://github.com/AccelerateHS/accelerate
