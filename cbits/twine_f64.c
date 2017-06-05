@@ -20,31 +20,33 @@ extern "C" {
 
 void interleave_f64
 (
-    const StgInt inf,
-    const StgInt sup,
+    const StgInt start,
+    const StgInt end,
     complex double * __restrict__ cplx,
     const double * __restrict__ real,
     const double * __restrict__ imag
 )
 {
-    for (StgInt i = inf; i < sup; ++i) {
+    StgInt i;
+    for (i = start; i < end; ++i) {
         const double re = real[i];
         const double im = imag[i];
 
-        cplx[i] = CMPLX( re, im );
+        cplx[i] = re + im * I;
     }
 }
 
 void deinterleave_f64
 (
-    const StgInt inf,
-    const StgInt sup,
+    const StgInt start,
+    const StgInt end,
     double * __restrict__ real,
     double * __restrict__ imag,
     const complex double * __restrict__ cplx
 )
 {
-    for (StgInt i = inf; i < sup; ++i) {
+    StgInt i;
+    for (i = start; i < end; ++i) {
         const complex double c = cplx[i];
 
         real[i] = creal(c);

@@ -27,11 +27,12 @@ void interleave_f32
     const float * __restrict__ imag
 )
 {
-    for (StgInt i = start; i < end; ++i) {
+    StgInt i;
+    for (i = start; i < end; ++i) {
         const float re = real[i];
         const float im = imag[i];
 
-        cplx[i] = CMPLXF( re, im );
+        cplx[i] = re + im * I;
     }
 }
 
@@ -44,7 +45,8 @@ void deinterleave_f32
     const complex float * __restrict__ cplx
 )
 {
-    for (StgInt i = start; i < end; ++i) {
+    StgInt i;
+    for (i = start; i < end; ++i) {
         const complex float c = cplx[i];
 
         real[i] = crealf(c);
