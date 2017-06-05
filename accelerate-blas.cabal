@@ -15,7 +15,7 @@ author:                 Trevor L. McDonell
 maintainer:             tmcdonell@cse.unsw.edu.au
 category:               Math
 build-type:             Simple
-extra-source-files:     ChangeLog.md
+extra-source-files:     CHANGELOG.md
 cabal-version:          >=1.10
 
 Flag llvm-cpu
