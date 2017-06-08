@@ -35,6 +35,9 @@ import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
 import qualified Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level3 as CPU
 #endif
+#ifdef ACCELERATE_LLVM_PTX_BACKEND
+import qualified Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level3    as PTX
+#endif
 
 
 -- | General matrix-matrix multiply
@@ -63,6 +66,9 @@ gemm alpha opA matA opB matB = go (lift (unit alpha, matA, matB))
     go =
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
       foreignAcc (CPU.gemm opA opB) $
+#endif
+#ifdef ACCELERATE_LLVM_PTX_BACKEND
+      foreignAcc (PTX.gemm opA opB) $
 #endif
       (\(unatup3 -> (_, arr, brr)) -> mXm arr brr)
 

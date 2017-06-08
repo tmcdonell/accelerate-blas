@@ -6,11 +6,35 @@ resolver: lts-8.0
 packages:
 - '.'
 
+- location:
+    git:    https://github.com/tmcdonell/accelerate.git
+    commit: be851212c1f5c26e948b85c5e428207c78bdae16
+  extra-dep: true
+
+- location:
+    git:    https://github.com/tmcdonell/cuda.git
+    commit: 1bff17152088384b71a439b01ec993a54e2618c9
+  extra-dep: true
+
+- location:
+    git:    https://github.com/tmcdonell/cublas.git
+    commit: 37eb3367b7edaea0072b8c809e8ac1ef3353d769
+  extra-dep: true
+
+- location:
+    git:    https://github.com/tmcdonell/accelerate-llvm.git
+    commit: 52a4820458c5a42f57c124b077dda5ed4a4e125a
+  extra-dep: true
+  subdirs:
+    - 'accelerate-llvm'
+    - 'accelerate-llvm-native'
+    - 'accelerate-llvm-ptx'
+
 extra-deps:
-- 'accelerate-1.0.0.0'
-- 'accelerate-llvm-1.0.0.0'
-- 'accelerate-llvm-native-1.0.0.0'
-- 'accelerate-llvm-ptx-1.0.0.0'
+# - 'accelerate-1.0.0.0'
+# - 'accelerate-llvm-1.0.0.0'
+# - 'accelerate-llvm-native-1.0.0.0'
+# - 'accelerate-llvm-ptx-1.0.0.0'
 - 'blas-hs-0.1.1.0'
 - 'chaselev-deque-0.5.0.5'
 - 'cuda-0.7.5.3'
@@ -34,7 +58,7 @@ flags:
     nvvm:  false
   accelerate-blas:
     llvm-cpu: true
-    llvm-ptx: false
+    llvm-ptx: true
   llvm-hs:
     shared-llvm: true
 

@@ -67,4 +67,19 @@ library
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level2
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level3
 
+  if flag(llvm-ptx)
+    CPP-options:        -DACCELERATE_LLVM_PTX_BACKEND
+    build-depends:
+        accelerate-llvm-ptx             == 1.0.*
+      , containers                      >= 0.5
+      , cublas                          >= 0.3
+      , cuda                            >= 0.8
+      , mtl                             >= 2.2
+      , storable-complex                >= 0.2
+
+    other-modules:
+      Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Base
+      Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Context
+      Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level3
+
 -- vim: nospell
