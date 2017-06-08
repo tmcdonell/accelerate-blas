@@ -13,7 +13,7 @@
 module Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Base
   where
 
-import Data.Array.Accelerate.Data.Complex
+import Data.Array.Accelerate.Lifetime
 import Data.Array.Accelerate.Array.Sugar                            ( Array(..), EltRepr )
 import Data.Array.Accelerate.Array.Data
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
@@ -73,4 +73,10 @@ withArrayData NumericRcomplex64 (AD_Pair (AD_Pair AD_Unit ad1) ad2) s k =
     r <- k (((), p1), p2)
     e <- checkpoint s
     return (Just e, (Just e, r))
+
+withLifetime' :: Lifetime a -> (a -> LLVM PTX b) -> LLVM PTX b
+withLifetime' l k = do
+  r <- k (unsafeGetValue l)
+  liftIO $ touchLifetime l
+  return r
 

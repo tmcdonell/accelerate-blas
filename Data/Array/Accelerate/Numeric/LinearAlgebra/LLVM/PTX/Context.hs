@@ -18,6 +18,7 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Context (
 import Data.Array.Accelerate.Lifetime
 import Data.Array.Accelerate.LLVM.PTX
 import Data.Array.Accelerate.LLVM.PTX.Foreign
+import Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Base
 
 import Control.Monad.State
 import Control.Concurrent.MVar
@@ -33,13 +34,13 @@ import GHC.Base
 import Prelude                                                      hiding ( lookup )
 
 
-withBLAS :: (BLAS.Handle -> IO b) -> LLVM PTX b
+withBLAS :: (BLAS.Handle -> LLVM PTX b) -> LLVM PTX b
 withBLAS k = do
   mh <- lookup
   h  <- case mh of
           Nothing -> new
           Just h  -> return h
-  liftIO $ withLifetime h k
+  withLifetime' h k
 
 new :: LLVM PTX (Lifetime BLAS.Handle)
 new = do
