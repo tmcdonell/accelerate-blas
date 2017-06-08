@@ -81,7 +81,7 @@ before_install:
   #     case ${LLVM} in
   #       3.5.*) source .travis/install-llvm-trusty.sh ;;
   #     esac
-  # - source .travis/install-cuda-trusty.sh
+  - source .travis/install-cuda-trusty.sh
   - source .travis/install-stack.sh
   - source .travis/update-ghc-settings.sh
 
