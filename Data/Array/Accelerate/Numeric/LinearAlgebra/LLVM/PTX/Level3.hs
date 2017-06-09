@@ -28,6 +28,13 @@ import qualified Foreign.CUDA.Ptr                                   as CUDA
 import qualified Foreign.CUDA.BLAS                                  as BLAS
 
 
+-- NOTE: cuBLAS requires that matrices are stored in column-major order
+-- (Fortran-style), but Accelerate uses a C-style convention where matrices are
+-- stored in row-major order.
+--
+-- At least for matrix-matrix multiply, we can get around this problem by making
+-- use of the equivalence \( B^T \cdot A^T = (A \cdot B)^T \).
+--
 gemm :: forall e. Numeric e
      => Transpose
      -> Transpose
