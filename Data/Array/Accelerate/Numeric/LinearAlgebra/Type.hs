@@ -44,6 +44,11 @@ instance Numeric (Complex Float) where
 instance Numeric (Complex Double) where
   numericR = NumericRcomplex64
 
+-- class Numeric a => RealNumeric a
+--
+-- instance RealNumeric Float
+-- instance RealNumeric Double
+
 type family NumericBaseT t where
   NumericBaseT Float            = Float
   NumericBaseT Double           = Double
