@@ -86,6 +86,7 @@ library
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Base
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Context
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Twine
+      Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level2
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level3
 
 -- vim: nospell

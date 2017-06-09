@@ -35,6 +35,9 @@ import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
 import qualified Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level2 as CPU
 #endif
+#ifdef ACCELERATE_LLVM_PTX_BACKEND
+import qualified Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level2    as PTX
+#endif
 
 
 -- | Computes the matrix-vector product of a general matrix.
@@ -56,6 +59,9 @@ gemv alpha opA matA x = go (lift (unit alpha, matA, x))
     go =
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
       foreignAcc (CPU.gemv opA) $
+#endif
+#ifdef ACCELERATE_LLVM_PTX_BACKEND
+      foreignAcc (PTX.gemv opA) $
 #endif
       (\(unatup3 -> (_, arr, brr)) -> mXv arr brr)
 
