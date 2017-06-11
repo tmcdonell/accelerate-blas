@@ -89,4 +89,45 @@ library
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level2
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level3
 
+
+benchmark accelerate-blas-bench
+  default-language:     Haskell2010
+  type:                 exitcode-stdio-1.0
+  hs-source-dirs:       bench
+  main-is:              Main.hs
+
+  build-depends:
+        base                            >= 4.7 && < 4.11
+      , accelerate                      == 1.0.*
+      , accelerate-blas
+      , criterion                       >= 1.0
+      , mwc-random                      >= 0.8
+      , mwc-random-accelerate           >= 0.1
+
+  ghc-options:
+      -O2
+      -Wall
+      -rtsopts
+      -threaded
+      -with-rtsopts=-N
+
+  if flag(llvm-cpu)
+    CPP-options:        -DACCELERATE_LLVM_NATIVE_BACKEND
+    build-depends:
+        accelerate-llvm-native          == 1.0.*
+
+  if flag(llvm-ptx)
+    CPP-options:        -DACCELERATE_LLVM_PTX_BACKEND
+    build-depends:
+        accelerate-llvm-ptx             == 1.0.*
+
+source-repository head
+  type:     git
+  location: https://github.com/tmcdonell/accelerate-blas
+
+source-repository this
+  type:     git
+  tag:      0.1.0.0
+  location: https://github.com/tmcdonell/accelerate-blas
+
 -- vim: nospell

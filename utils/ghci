@@ -7,5 +7,6 @@ stack exec ghci -- \
   $DISTDIR/build/cbits/twine_f32.o \
   $DISTDIR/build/cbits/twine_f64.o \
   -j +RTS -N -A64M -n2m -RTS \
+  -fno-ghci-sandbox \
   $@
 
