@@ -95,6 +95,10 @@ benchmark accelerate-blas-bench
   type:                 exitcode-stdio-1.0
   hs-source-dirs:       bench
   main-is:              Main.hs
+  other-modules:
+      Accelerate
+      Extra
+      HMatrix
 
   build-depends:
         base                            >= 4.7 && < 4.11
@@ -103,6 +107,8 @@ benchmark accelerate-blas-bench
       , criterion                       >= 1.0
       , mwc-random                      >= 0.8
       , mwc-random-accelerate           >= 0.1
+      , deepseq                         >= 1.0
+      , hmatrix                         >= 0.17
 
   ghc-options:
       -O2
