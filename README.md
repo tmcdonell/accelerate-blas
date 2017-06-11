@@ -12,11 +12,11 @@ added to the library. Contributions are also welcome!
 
 ## FFI bindings
 
-  * **accelerate-llvm-native:** Bindings are provided by [blas-hs] package,
+  * **accelerate-llvm-native:** FFI bindings are provided by the [blas-hs] package,
     which has several options for which underlying BLAS library to link against;
     see that package for setup details.
 
-  * **accelerate-llvm-ptx:** FFI bindings to NVIDIA [cuBLAS] library.
+  * **accelerate-llvm-ptx:** FFI bindings to the NVIDIA [cuBLAS] library.
 
 ## Complex numbers
 
