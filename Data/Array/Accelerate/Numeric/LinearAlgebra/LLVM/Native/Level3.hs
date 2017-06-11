@@ -27,6 +27,10 @@ import qualified Blas.Primitive.Types                               as C
 import qualified Blas.Primitive.Unsafe                              as C
 
 
+-- TODO: check whether it is faster to compute this as column-major order:
+--
+-- https://www.christophlassner.de/using-blas-from-c-with-row-major-data.html
+--
 gemm :: forall e. Numeric e
      => Transpose
      -> Transpose
