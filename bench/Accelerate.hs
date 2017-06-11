@@ -185,7 +185,3 @@ run2 b f x y = go (x,y)
   where
     !go = run1 b (A.uncurry f)
 
-infixr 0 $$
-($$) :: (b -> a) -> (c -> d -> b) -> c -> d -> a
-(f $$ g) x y = f (g x y)
-

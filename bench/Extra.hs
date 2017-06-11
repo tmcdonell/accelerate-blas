@@ -27,3 +27,7 @@ instance Variate e => Variate (Complex e) where
     let (ur:+ui,vr:+vi) = r
     in  (:+) <$> uniformR (ur,vr) gen <*> uniformR (ui,vi) gen
 
+infixr 0 $$
+($$) :: (b -> a) -> (c -> d -> b) -> c -> d -> a
+(f $$ g) x y = f (g x y)
+
