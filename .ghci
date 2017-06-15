@@ -1,3 +1,4 @@
 :set -DACCELERATE_LLVM_NATIVE_BACKEND
 :set -DACCELERATE_LLVM_PTX_BACKEND
 :set -ibench
+:set -itest

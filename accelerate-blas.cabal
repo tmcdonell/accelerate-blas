@@ -90,6 +90,42 @@ library
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level3
 
 
+test-suite accelerate-blas-test
+  default-language:     Haskell2010
+  type:                 exitcode-stdio-1.0
+  hs-source-dirs:       test
+  main-is:              Main.hs
+  other-modules:
+      Backend
+      Hedgehog.Gen.Array
+      Hedgehog.Gen.Shape
+      Level3
+      Similar
+
+  build-depends:
+      base                            >= 4.7 && < 4.11
+    , accelerate                      == 1.0.*
+    , accelerate-blas
+    , hedgehog                        >= 0.3
+
+  ghc-options:
+      -O2
+      -Wall
+      -rtsopts
+      -threaded
+      -with-rtsopts=-N
+
+  if flag(llvm-cpu)
+    CPP-options:        -DACCELERATE_LLVM_NATIVE_BACKEND
+    build-depends:
+        accelerate-llvm-native          == 1.0.*
+
+  if flag(llvm-ptx)
+    CPP-options:        -DACCELERATE_LLVM_PTX_BACKEND
+    build-depends:
+        accelerate-llvm-ptx             == 1.0.*
+
+
 benchmark accelerate-blas-bench
   default-language:     Haskell2010
   type:                 exitcode-stdio-1.0
