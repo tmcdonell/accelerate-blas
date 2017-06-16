@@ -57,6 +57,8 @@ type family NumericBaseT t where
   NumericBaseT (Complex Double) = Double
 
 
+-- | Matrices as dense two-dimensional arrays in row-major ordering
+--
 type Matrix e = Array DIM2 e
 
 -- | Orientation of the underlying data.
