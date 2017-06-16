@@ -10,7 +10,7 @@ import Similar
 
 import Data.Array.Accelerate                                        as A
 import Data.Array.Accelerate.Data.Complex                           as A
-import Data.Array.Accelerate.Numeric.LinearAlgebra
+import Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level3
 
 import Hedgehog
 import Hedgehog.Gen                                                 ( Gen )
@@ -47,14 +47,21 @@ test_gemm
     -> Gen IO e
     -> Property
 test_gemm backend r g =
-  let !expect = run1 Interpreter (A.uncurry (<>)) -- so slooooow D:
-      !actual = run1 backend     (A.uncurry (<>))
-  in
   property $ do
+    alpha <- forAll g
     m     <- forAll (Gen.int r)
     n     <- forAll (Gen.int r)
     k     <- forAll (Gen.int r)
-    matA  <- forAll (genArray (Z :. m :. k) g)
-    matB  <- forAll (genArray (Z :. k :. n) g)
-    expect (matA,matB) ~~~ actual (matA, matB)
+    opA   <- forAll (Gen.element [N,T,H])
+    opB   <- forAll (Gen.element [N,T,H])
+    matA  <- forAll $ case opA of
+                        N -> genArray (Z :. m :. k) g
+                        _ -> genArray (Z :. k :. m) g
+    matB  <- forAll $ case opB of
+                        N -> genArray (Z :. k :. n) g
+                        _ -> genArray (Z :. n :. k) g
+    --
+    let test = gemm (constant alpha) opA (use matA) opB (use matB)
+    --
+    run Interpreter test ~~~ run backend test
 

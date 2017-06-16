@@ -2,7 +2,6 @@
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs             #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE TypeFamilies      #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.LinearAlgebra.Type
@@ -19,6 +18,8 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 
 import Data.Array.Accelerate                                        as A
 import Data.Array.Accelerate.Data.Complex                           as A
+
+import qualified Prelude                                            as P
 
 
 -- For explicit dictionary reification, to recover the type the operation should
@@ -68,6 +69,7 @@ type Matrix e = Array DIM2 e
 data Orientation
   = R -- ^ row major
   | C -- ^ column major
+  deriving (P.Eq, P.Show)
 
 -- | Many operations allow you to implicitly transpose the arguments. For
 -- a given input matrix @mat@ with dimensions @Z :. m :. n@ (that is; @m@ rows
@@ -85,4 +87,5 @@ data Transpose
   -- matrices a given element @mat ! Z:.j:.i == x :+ y@ will be treated as
   -- actually being @mat ! Z:.i:.j == x :+ (-y)@.
   | H
+  deriving (P.Eq, P.Show)
 
