@@ -34,7 +34,7 @@ tests backend
   , ("gemm.complex64", test_gemm backend r c64)
   ]
   where
-    r   = Range.linear 1 256
+    r   = Range.linearFrom 0 1 64
     f32 = Gen.float  (Range.linearFracFrom 0 (-1) 1)
     f64 = Gen.double (Range.linearFracFrom 0 (-1) 1)
     c32 = (:+) <$> f32 <*> f32
