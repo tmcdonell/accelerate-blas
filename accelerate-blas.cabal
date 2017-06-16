@@ -99,6 +99,7 @@ test-suite accelerate-blas-test
       Backend
       Hedgehog.Gen.Array
       Hedgehog.Gen.Shape
+      Level2
       Level3
       Similar
 
