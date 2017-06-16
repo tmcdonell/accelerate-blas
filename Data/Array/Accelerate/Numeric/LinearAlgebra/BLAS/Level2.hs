@@ -46,6 +46,12 @@ import qualified Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level2    
 -- y = \alpha * \mathrm{op}(A) * x
 -- \]
 --
+-- where:
+--
+--   * 'shape' \(\mathrm{op}(A)\) @= Z :. m :. n@
+--   * 'shape' \(x\) @= Z :. n@
+--   * 'shape' \(y\) @= Z :. m@
+--
 -- <https://software.intel.com/en-us/mkl-developer-reference-c-cblas-gemv>
 --
 gemv :: forall e. Numeric e
