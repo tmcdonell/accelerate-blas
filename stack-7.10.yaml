@@ -8,7 +8,7 @@ packages:
 
 - location:
     git:    https://github.com/tmcdonell/accelerate.git
-    commit: be851212c1f5c26e948b85c5e428207c78bdae16
+    commit: 0216f1afef4460b672235c81a8e6f954efb650e3
   extra-dep: true
 
 - location:
@@ -18,12 +18,12 @@ packages:
 
 - location:
     git:    https://github.com/tmcdonell/cublas.git
-    commit: 37eb3367b7edaea0072b8c809e8ac1ef3353d769
+    commit: 5e6fc1bdd0f6225b040c6e8c1edb59d4d38fa660
   extra-dep: true
 
 - location:
     git:    https://github.com/tmcdonell/accelerate-llvm.git
-    commit: 52a4820458c5a42f57c124b077dda5ed4a4e125a
+    commit: 7b79cce83f3f16aa4c5b24c5e947d5e573d91418
   extra-dep: true
   subdirs:
     - 'accelerate-llvm'
@@ -40,9 +40,10 @@ extra-deps:
 - 'cuda-0.7.5.3'
 - 'hedgehog-0.3'
 - 'libffi-0.1'
-- 'llvm-hs-4.0.1.0'
-- 'llvm-hs-pure-4.0.0.0'
+- 'llvm-hs-4.1.0.0'
+- 'llvm-hs-pure-4.1.0.0'
 - 'mwc-random-accelerate-0.1.0.0'
+- 'nvvm-0.7.5.2'
 - 'unique-0'
 
 # Override default flag values for local packages and extra-deps
