@@ -64,7 +64,7 @@ interleave (((), d_re), d_im) s n k = do
         withArray cplx s  $ \d_cplx     -> do
           withLifetime' s $ \s'         -> do
             liftIO $ launch pack s' n d_cplx d_re d_im
-          k (CUDA.castDevPtr d_cplx)
+          k (CUDA.castDevPtr d_cplx :: DevicePtr (Complex Float))
     --
     nR@NumericRcomplex64 -> do
       cplx <- allocateRemote (Z :. n * 2) :: LLVM PTX (Vector Double)
@@ -72,7 +72,7 @@ interleave (((), d_re), d_im) s n k = do
         withArray cplx s  $ \d_cplx     -> do
           withLifetime' s $ \s'         -> do
             liftIO $ launch pack s' n d_cplx d_re d_im
-          k (CUDA.castDevPtr d_cplx)
+          k (CUDA.castDevPtr d_cplx :: DevicePtr (Complex Double))
 
 deinterleave
     :: forall e. Numeric (Complex e)
@@ -86,50 +86,46 @@ deinterleave (((), d_re), d_im) d_cplx s n = do
     nR@NumericRcomplex32 -> do
       withTwine nR      $ \(_,_,unpack) -> do
         withLifetime' s $ \s'           -> do
-          liftIO $ launch unpack s' n d_re d_im (CUDA.castDevPtr d_cplx)
+          liftIO $ launch unpack s' n d_re d_im (CUDA.castDevPtr d_cplx :: DevicePtr Float)
     --
     nR@NumericRcomplex64 -> do
       withTwine nR      $ \(_,_,unpack) -> do
         withLifetime' s $ \s'           -> do
-          liftIO $ launch unpack s' n d_re d_im (CUDA.castDevPtr d_cplx)
+          liftIO $ launch unpack s' n d_re d_im (CUDA.castDevPtr d_cplx :: DevicePtr Double)
 
 
 withTwine :: NumericR (Complex e) -> ((CUDA.Module, Kernel, Kernel) -> LLVM PTX b) -> LLVM PTX b
 withTwine nR k = do
-  mh <- lookup nR
-  m  <- case mh of
-          Nothing -> new nR
-          Just m  -> return m
-  withLifetime' m k
-
-new :: NumericR (Complex e) -> LLVM PTX (Lifetime (CUDA.Module, Kernel, Kernel))
-new nR = do
   ptx <- gets ptxContext
   let lc  = deviceContext ptx
       prp = deviceProperties ptx
+      mds = modules nR
   --
-  liftIO $ do
+  mdl <- liftIO $ do
     withLifetime lc $ \ctx -> do
+     modifyMVar mds $ \im  -> do
       let key = toKey ctx
-          mds = modules nR
-      mdl     <- CUDA.loadData $ case nR of
-                                   NumericRcomplex32 -> ptx_twine_f32
-                                   NumericRcomplex64 -> ptx_twine_f64
-      pack    <- mkKernel "interleave"   mdl prp
-      unpack  <- mkKernel "deinterleave" mdl prp
-      let mkk = (mdl, pack, unpack)
+      case IM.lookup key im of
+        -- Module is not loaded yet; add to the current context and the global
+        -- state for later reuse
+        Nothing -> do
+          mdl     <- CUDA.loadData $ case nR of
+                                       NumericRcomplex32 -> ptx_twine_f32
+                                       NumericRcomplex64 -> ptx_twine_f64
+          pack    <- mkKernel "interleave"   mdl prp
+          unpack  <- mkKernel "deinterleave" mdl prp
+          let mkk = (mdl, pack, unpack)
+          --
+          lm      <- newLifetime mkk
+          addFinalizer lc $ modifyMVar mds (\im' -> return (IM.delete key im', ()))
+          addFinalizer lm $ CUDA.unload mdl
+          return ( IM.insert key lm im, lm )
 
-      lm      <- newLifetime mkk
-      addFinalizer lc $ modifyMVar mds (\im -> return (IM.delete key im, ()))
-      addFinalizer lm $ CUDA.unload mdl
-      modifyMVar mds (\im -> return (IM.insert key lm im, lm))
+        -- Return existing module
+        Just lm  -> return (im, lm)
+  --
+  withLifetime' mdl k
 
-lookup :: NumericR (Complex e) -> LLVM PTX (Maybe (Lifetime (CUDA.Module, Kernel, Kernel)))
-lookup nR = do
-  lc <- gets (deviceContext . ptxContext)
-  liftIO $
-    withLifetime lc       $ \ctx ->
-    withMVar (modules nR) $ \im  -> return (IM.lookup (toKey ctx) im)
 
 toKey :: CUDA.Context -> IM.Key
 toKey (CUDA.Context (Ptr addr#)) = I# (addr2Int# addr#)

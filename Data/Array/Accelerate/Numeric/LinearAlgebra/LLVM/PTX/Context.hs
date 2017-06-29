@@ -34,34 +34,38 @@ import GHC.Base
 import Prelude                                                      hiding ( lookup )
 
 
+-- Execute an operation with a cuBLAS handle appropriate for the current
+-- execution context.
+--
+-- Initial creation of the context is an atomic operation, but subsequently
+-- multiple threads may use the context concurrently.
+--
+-- <http://docs.nvidia.com/cuda/cublas/index.html#thread-safety2>
+--
 withBLAS :: (BLAS.Handle -> LLVM PTX b) -> LLVM PTX b
 withBLAS k = do
-  mh <- lookup
-  h  <- case mh of
-          Nothing -> new
-          Just h  -> return h
+  lc <- gets (deviceContext . ptxContext)
+  h  <- liftIO $
+          withLifetime lc    $ \ctx ->
+          modifyMVar handles $ \im  ->
+            let key = toKey ctx in
+            case IM.lookup key im of
+              -- handle does not exist yet; create it and add to the global
+              -- state for reuse
+              Nothing -> do
+                h <- BLAS.create
+                l <- newLifetime h
+                -- BLAS.setPointerMode h BLAS.Device
+                BLAS.setAtomicsMode h BLAS.Allowed
+                addFinalizer lc $ modifyMVar handles (\im' -> return (IM.delete key im', ()))
+                addFinalizer l  $ BLAS.destroy h
+                return ( IM.insert key l im, l )
+
+              -- return existing handle
+              Just h  -> return (im, h)
+  --
   withLifetime' h k
 
-new :: LLVM PTX (Lifetime BLAS.Handle)
-new = do
-  lc <- gets (deviceContext . ptxContext)
-  liftIO $
-    withLifetime lc $ \ctx -> do
-      let key = toKey ctx
-      h <- BLAS.create
-      l <- newLifetime h
-      -- BLAS.setPointerMode h BLAS.Device
-      BLAS.setAtomicsMode h BLAS.Allowed
-      addFinalizer lc $ modifyMVar handles (\im -> return (IM.delete key im, ()))
-      addFinalizer l  $ BLAS.destroy h
-      modifyMVar handles (\im -> return (IM.insert key l im, l))
-
-lookup :: LLVM PTX (Maybe (Lifetime BLAS.Handle))
-lookup = do
-  lc <- gets (deviceContext . ptxContext)
-  liftIO $
-    withLifetime lc  $ \ctx ->
-    withMVar handles $ \im  -> return (IM.lookup (toKey ctx) im)
 
 toKey :: CUDA.Context -> IM.Key
 toKey (CUDA.Context (Ptr addr#)) = I# (addr2Int# addr#)
