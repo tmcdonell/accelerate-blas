@@ -33,6 +33,7 @@ Flag llvm-ptx
 library
   default-language:     Haskell2010
   exposed-modules:
+    Data.Array.Accelerate.Numeric.Sum
     Data.Array.Accelerate.Numeric.LinearAlgebra
     Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level1
     Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level2
@@ -40,6 +41,9 @@ library
 
   other-modules:
     Data.Array.Accelerate.Numeric.LinearAlgebra.Type
+    Data.Array.Accelerate.Numeric.Sum.Arithmetic
+    Data.Array.Accelerate.Numeric.Sum.LLVM.Native
+    Data.Array.Accelerate.Numeric.Sum.LLVM.PTX
 
   build-depends:
         base                            >= 4.7 && < 4.11
@@ -52,8 +56,10 @@ library
   if flag(llvm-cpu)
     CPP-options:        -DACCELERATE_LLVM_NATIVE_BACKEND
     build-depends:
-        accelerate-llvm-native          == 1.0.*
+        accelerate-llvm                 == 1.0.*
+      , accelerate-llvm-native          == 1.0.*
       , blas-hs                         >= 0.1
+      , llvm-hs-pure                    >= 4.0
       , storable-complex                >= 0.2
 
     cc-options:
@@ -69,16 +75,20 @@ library
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level2
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level3
+      Data.Array.Accelerate.Numeric.Sum.LLVM.Prim
+
 
   if flag(llvm-ptx)
     CPP-options:        -DACCELERATE_LLVM_PTX_BACKEND
     build-depends:
-        accelerate-llvm-ptx             == 1.0.*
+        accelerate-llvm                 == 1.0.*
+      , accelerate-llvm-ptx             == 1.0.*
       , bytestring                      >= 0.9
       , containers                      >= 0.5
       , cublas                          >= 0.3
       , cuda                            >= 0.8
       , file-embed                      >= 0.0.10
+      , llvm-hs-pure                    >= 4.0
       , mtl                             >= 2.2
       , storable-complex                >= 0.2
 
@@ -88,6 +98,7 @@ library
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Twine
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level2
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level3
+      Data.Array.Accelerate.Numeric.Sum.LLVM.Prim
 
 
 test-suite accelerate-blas-test
