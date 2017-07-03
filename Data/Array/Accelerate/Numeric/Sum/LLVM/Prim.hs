@@ -35,12 +35,18 @@ import LLVM.AST.Operand
 import LLVM.AST.Type
 
 
+-- | As (+), but don't allow potentially unsafe floating-point optimisations.
+--
 fadd :: FloatingType a -> IROpenFun1 arch env aenv ((a,a) -> a)
 fadd t = IRFun1 $ A.uncurry (binop FAdd t)
 
+-- | As (-), but don't allow potentially unsafe floating-point optimisations.
+--
 fsub :: FloatingType a -> IROpenFun1 arch env aenv ((a,a) -> a)
 fsub t = IRFun1 $ A.uncurry (binop FSub t)
 
+-- | As (*), but don't allow potentially unsafe floating-point optimisations.
+--
 fmul :: FloatingType a -> IROpenFun1 arch env aenv ((a,a) -> a)
 fmul t = IRFun1 $ A.uncurry (binop FMul t)
 
