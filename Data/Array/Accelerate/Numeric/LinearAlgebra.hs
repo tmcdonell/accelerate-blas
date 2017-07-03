@@ -29,7 +29,7 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra (
   (<>),
 
   -- * Diagonal
-  ident, diag,
+  identity, diagonal,
 
 ) where
 
@@ -158,13 +158,13 @@ infixr 8 <>
 
 -- | Create a square identity matrix of the given dimension
 --
-ident :: Num e => Exp Int -> Acc (Matrix e)
-ident n = diag (fill (index1 n) 1)
+identity :: Num e => Exp Int -> Acc (Matrix e)
+identity n = diagonal (fill (index1 n) 1)
 
 -- | Create a square matrix with the given diagonal
 --
-diag :: Num e => Acc (Vector e) -> Acc (Matrix e)
-diag v =
+diagonal :: Num e => Acc (Vector e) -> Acc (Matrix e)
+diagonal v =
   let n     = length v
       zeros = fill (index2 n n) 0
   in
