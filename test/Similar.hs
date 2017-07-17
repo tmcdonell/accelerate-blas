@@ -8,7 +8,7 @@ import Data.Complex
 import Data.Array.Accelerate                              ( Array, Shape, Z, (:.)(..), arrayShape, toList )
 
 import Hedgehog
-import GHC.Stack
+import Hedgehog.Internal.Source                           ( HasCallStack, withFrozenCallStack )
 
 
 infix 4 ~~~
