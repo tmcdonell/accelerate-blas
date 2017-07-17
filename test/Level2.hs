@@ -13,7 +13,6 @@ import Data.Array.Accelerate.Data.Complex                           as A
 import Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level2
 
 import Hedgehog
-import Hedgehog.Gen                                                 ( Gen )
 import Hedgehog.Gen.Array
 import qualified Hedgehog.Gen                                       as Gen
 import qualified Hedgehog.Range                                     as Range
@@ -43,7 +42,7 @@ test_gemv
     :: (Numeric e, Similar e)
     => Backend
     -> Range Int
-    -> Gen IO e
+    -> Gen e
     -> Property
 test_gemv backend r g =
   property $ do
@@ -56,9 +55,9 @@ test_gemv backend r g =
                         N -> genArray (Z :. m :. n) g
                         _ -> genArray (Z :. n :. m) g
     --
-    let test = gemv (constant alpha) opA (use matA) (use vecx)
+    let t = gemv (constant alpha) opA (use matA) (use vecx)
     --
-    run Interpreter test ~~~ run backend test
+    run Interpreter t ~~~ run backend t
 
 
 

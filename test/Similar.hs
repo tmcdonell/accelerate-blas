@@ -8,12 +8,12 @@ import Data.Complex
 import Data.Array.Accelerate                              ( Array, Shape, Z, (:.)(..), arrayShape, toList )
 
 import Hedgehog
-import GHC.Stack
+import Hedgehog.Internal.Source                           ( HasCallStack, withFrozenCallStack )
 
 
 infix 4 ~~~
-(~~~) :: (Monad m, Similar a, Show (Sim a), HasCallStack) => a -> a -> Test m ()
-a ~~~ b = Sim a === Sim b
+(~~~) :: (MonadTest m, Similar a, Show (Sim a), HasCallStack) => a -> a -> m ()
+a ~~~ b = withFrozenCallStack $ Sim a === Sim b
 
 
 data Sim a = Sim a

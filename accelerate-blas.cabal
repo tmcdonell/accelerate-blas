@@ -118,7 +118,7 @@ test-suite accelerate-blas-test
       base                            >= 4.7 && < 4.11
     , accelerate                      == 1.0.*
     , accelerate-blas
-    , hedgehog                        >= 0.3
+    , hedgehog                        >= 0.5
 
   ghc-options:
       -O2

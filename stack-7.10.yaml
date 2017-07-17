@@ -39,14 +39,17 @@ extra-deps:
 - 'Cabal-1.24.2.0'
 - 'chaselev-deque-0.5.0.5'
 - 'cuda-0.7.5.3'
-- 'hedgehog-0.3'
+- 'hedgehog-0.5'
 - 'libffi-0.1'
 - 'llvm-hs-4.1.0.0'
 - 'llvm-hs-pure-4.1.0.0'
 - 'mwc-random-accelerate-0.1.0.0'
 - 'nvvm-0.7.5.2'
 - 'process-1.4.3.0'
+- 'transformers-0.5.4.0'
+- 'transformers-compat-0.5.1.4'
 - 'unique-0'
+- 'wl-pprint-annotated-0.1.0.0'
 
 # Override default flag values for local packages and extra-deps
 flags:
