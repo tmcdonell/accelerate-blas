@@ -24,11 +24,11 @@ extra-source-files:
 
 Flag llvm-cpu
   Description:          Enable the LLVM backend for multicore CPUs
-  Default:              False
+  Default:              True
 
 Flag llvm-ptx
   Description:          Enable the LLVM PTX backend for NVIDIA GPUs
-  Default:              False
+  Default:              True
 
 library
   default-language:     Haskell2010
