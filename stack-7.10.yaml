@@ -8,27 +8,32 @@ packages:
 
 - location:
     git:    https://github.com/tmcdonell/accelerate.git
-    commit: 0216f1afef4460b672235c81a8e6f954efb650e3
-  extra-dep: true
-
-- location:
-    git:    https://github.com/tmcdonell/cuda.git
-    commit: 1bff17152088384b71a439b01ec993a54e2618c9
-  extra-dep: true
-
-- location:
-    git:    https://github.com/tmcdonell/cublas.git
-    commit: 5e6fc1bdd0f6225b040c6e8c1edb59d4d38fa660
+    commit: aee5f0232e2cfdcf030e2a7ca0570e9ced017d63
   extra-dep: true
 
 - location:
     git:    https://github.com/tmcdonell/accelerate-llvm.git
-    commit: 7b79cce83f3f16aa4c5b24c5e947d5e573d91418
+    commit: 3bc4216e527fa77149259dd19d3d4103ffed9518
   extra-dep: true
   subdirs:
     - 'accelerate-llvm'
     - 'accelerate-llvm-native'
     - 'accelerate-llvm-ptx'
+
+- location:
+    git:    https://github.com/tmcdonell/cuda.git
+    commit: c39da756025d7a6fd9fb3fd368736ee05ced5df2
+  extra-dep: true
+
+- location:
+    git:    https://github.com/tmcdonell/cublas.git
+    commit: 46d06f15ad84ec424c138b61df4c332cb29702d8
+  extra-dep: true
+
+- location:
+    git:    https://github.com/tmcdonell/nvvm.git
+    commit: 632323e2a7c3c75bb07a3edb35de47273dc4cd07
+  extra-dep: true
 
 extra-deps:
 # - 'accelerate-1.0.0.0'
@@ -41,7 +46,7 @@ extra-deps:
 - 'cuda-0.7.5.3'
 - 'hedgehog-0.5'
 - 'libffi-0.1'
-- 'llvm-hs-4.1.0.0'
+- 'llvm-hs-4.2.0'
 - 'llvm-hs-pure-4.1.0.0'
 - 'mwc-random-accelerate-0.1.0.0'
 - 'nvvm-0.7.5.2'
