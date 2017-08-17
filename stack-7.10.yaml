@@ -46,7 +46,7 @@ extra-deps:
 - 'cuda-0.7.5.3'
 - 'hedgehog-0.5'
 - 'libffi-0.1'
-- 'llvm-hs-4.2.0'
+- 'llvm-hs-4.1.0.0'
 - 'llvm-hs-pure-4.1.0.0'
 - 'mwc-random-accelerate-0.1.0.0'
 - 'nvvm-0.7.5.2'
