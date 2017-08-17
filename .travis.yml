@@ -108,7 +108,7 @@ install:
       if [ ${GHC} == head -o ! -e stack.yaml ]; then
         travis_retry cabal install --only-dependencies
       else
-        travis_retry stack build --only-dependencies --fast --no-terminal --no-haddock-deps --test --no-run-tests --bench --no-run-benchmarks
+        travis_retry stack build --only-dependencies --fast --no-terminal --no-haddock-deps
       fi
 
 script:
@@ -117,7 +117,7 @@ script:
         travis_retry cabal install
         travis_retry cabal haddock
       else
-        travis_retry stack build --fast --no-terminal --haddock --no-haddock-deps --test --no-run-tests --bench --no-run-benchmarks
+        travis_retry stack build --fast --no-terminal --haddock --no-haddock-deps
       fi
 
 after_success:
