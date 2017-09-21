@@ -20,7 +20,7 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level1 (
   Numeric, Vector,
 
   -- Level1 operations
-  -- sdot,
+  sdot,
   dotu,
   dotc,
   asum,
@@ -34,9 +34,9 @@ import Data.Array.Accelerate.Data.Complex                           as A
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 
 
-{--
 -- | Computes a vector-vector dot product, using double precision accumulation
--- of the intermediate result.
+-- of the intermediate result. Includes a scalar (initial) value to be added to
+-- the inner product.
 --
 -- <https://software.intel.com/en-us/mkl-developer-reference-c-cblas-sdot>
 --
@@ -59,7 +59,7 @@ sdot z xs ys =
 
     d2f :: Exp (Complex Double) -> Exp (Complex Float)
     d2f c = lift (toFloating (real c) :+ toFloating (imag c))
---}
+
 
 -- | Computes a vector-vector dot product
 --

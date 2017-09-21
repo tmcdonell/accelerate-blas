@@ -1,8 +1,10 @@
+{-# LANGUAGE CPP                 #-}
 {-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE GADTs               #-}
 {-# LANGUAGE NoImplicitPrelude   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE ViewPatterns        #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level3
 -- Copyright   : [2017] Trevor L. McDonell
@@ -26,8 +28,16 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level3 (
 ) where
 
 import Data.Array.Accelerate                                        as A
+import Data.Array.Accelerate.Smart                                  as A
 import Data.Array.Accelerate.Data.Complex                           as A
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
+
+#ifdef ACCELERATE_LLVM_NATIVE_BACKEND
+import qualified Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level3 as CPU
+#endif
+#ifdef ACCELERATE_LLVM_PTX_BACKEND
+import qualified Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level3    as PTX
+#endif
 
 
 -- | General matrix-matrix multiply
@@ -51,12 +61,21 @@ gemm :: forall e. Numeric e
      -> Transpose             -- ^ operation to apply to B
      -> Acc (Matrix e)        -- ^ B
      -> Acc (Matrix e)        -- ^ C
-gemm alpha opA matA opB matB =
-  matA `mXm` matB
+gemm alpha opA matA opB matB = go (lift (unit alpha, matA, matB))
   where
+    go =
+#ifdef ACCELERATE_LLVM_NATIVE_BACKEND
+      foreignAcc (CPU.gemm opA opB) $
+#endif
+#ifdef ACCELERATE_LLVM_PTX_BACKEND
+      foreignAcc (PTX.gemm opA opB) $
+#endif
+      (\(unatup3 -> (_, arr, brr)) -> mXm arr brr)
+
     -- General dense matrix-matrix multiply written in pure Accelerate. This is
     -- not efficient due to the memory access patterns. We could probably
-    -- improve this a bit with a divide-and-conquer algorithm, for example.
+    -- improve this a little bit with a divide-and-conquer algorithm, for
+    -- example, but using a foreign implementation will be best.
     --
     mXm :: Acc (Matrix e) -> Acc (Matrix e) -> Acc (Matrix e)
     mXm arr brr

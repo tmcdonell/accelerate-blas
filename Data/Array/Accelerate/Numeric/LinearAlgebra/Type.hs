@@ -1,7 +1,7 @@
+{-# LANGUAGE ConstraintKinds   #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs             #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE TypeFamilies      #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.LinearAlgebra.Type
@@ -18,6 +18,8 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 
 import Data.Array.Accelerate                                        as A
 import Data.Array.Accelerate.Data.Complex                           as A
+
+import qualified Prelude                                            as P
 
 
 -- For explicit dictionary reification, to recover the type the operation should
@@ -44,6 +46,11 @@ instance Numeric (Complex Float) where
 instance Numeric (Complex Double) where
   numericR = NumericRcomplex64
 
+-- class Numeric a => RealNumeric a
+--
+-- instance RealNumeric Float
+-- instance RealNumeric Double
+
 type family NumericBaseT t where
   NumericBaseT Float            = Float
   NumericBaseT Double           = Double
@@ -51,6 +58,8 @@ type family NumericBaseT t where
   NumericBaseT (Complex Double) = Double
 
 
+-- | Matrices as dense two-dimensional arrays in row-major ordering
+--
 type Matrix e = Array DIM2 e
 
 -- | Orientation of the underlying data.
@@ -60,8 +69,9 @@ type Matrix e = Array DIM2 e
 data Orientation
   = R -- ^ row major
   | C -- ^ column major
+  deriving (P.Eq, P.Show)
 
--- | Many Operations allow you to implicitly transpose the arguments. For
+-- | Many operations allow you to implicitly transpose the arguments. For
 -- a given input matrix @mat@ with dimensions @Z :. m :. n@ (that is; @m@ rows
 -- and @n@ columns):
 --
@@ -77,4 +87,5 @@ data Transpose
   -- matrices a given element @mat ! Z:.j:.i == x :+ y@ will be treated as
   -- actually being @mat ! Z:.i:.j == x :+ (-y)@.
   | H
+  deriving (P.Eq, P.Show)
 

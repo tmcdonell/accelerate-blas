@@ -1,4 +1,7 @@
+{-# LANGUAGE ConstraintKinds   #-}
+{-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE ViewPatterns      #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.LinearAlgebra
 -- Copyright   : [2017] Trevor L. McDonell
@@ -14,7 +17,7 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra (
   -- * Types
   Numeric, Scalar, Vector, Matrix,
 
-  -- * Operations
+  -- * Products
   -- ** Vector-vector
   (<.>),
   (><),
@@ -24,6 +27,9 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra (
 
   -- ** Matrix-matrix
   (<>),
+
+  -- * Diagonal
+  identity, diagonal,
 
 ) where
 
@@ -148,4 +154,19 @@ infixr 8 <#
 infixr 8 <>
 (<>) :: Numeric e => Acc (Matrix e) -> Acc (Matrix e) -> Acc (Matrix e)
 (<>) matA matB = gemm 1 N matA N matB
+
+
+-- | Create a square identity matrix of the given dimension
+--
+identity :: Num e => Exp Int -> Acc (Matrix e)
+identity n = diagonal (fill (index1 n) 1)
+
+-- | Create a square matrix with the given diagonal
+--
+diagonal :: Num e => Acc (Vector e) -> Acc (Matrix e)
+diagonal v =
+  let n     = length v
+      zeros = fill (index2 n n) 0
+  in
+  permute const zeros (\(unindex1 -> i) -> index2 i i) v
 
