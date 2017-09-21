@@ -1,6 +1,11 @@
 # Revision history for accelerate-blas
 
-## 0.1.0.0 -- YYYY-mm-dd
+Notable changes to the project will be documented in this file.
 
-* First version. Released on an unsuspecting world.
+The format is based on [Keep a Changelog](http://keepachangelog.com/) and the
+project adheres to the [Haskell Package Versioning
+Policy (PVP)](https://pvp.haskell.org)
+
+## 0.1.0.0 - 2017-09-21
+  * First version. Released on an unsuspecting world.
 
