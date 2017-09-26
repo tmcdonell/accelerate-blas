@@ -1,5 +1,5 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE TypeOperators     #-}
 
 module Similar where
@@ -12,7 +12,7 @@ import Hedgehog.Internal.Source                           ( HasCallStack, withFr
 
 
 infix 4 ~~~
-(~~~) :: (MonadTest m, Similar a, Show (Sim a), HasCallStack) => a -> a -> m ()
+(~~~) :: (MonadTest m, Similar a, Show a, HasCallStack) => a -> a -> m ()
 a ~~~ b = withFrozenCallStack $ Sim a === Sim b
 
 

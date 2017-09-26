@@ -12,7 +12,7 @@ import Hedgehog.Gen                                       ( int )
 -- Generate a randomly sized shape of the given dimensionality
 --
 class GenShape sh where
-  genShape :: Monad m => Range Int -> Gen sh
+  genShape :: Range Int -> Gen sh
 
 instance GenShape Z where
   genShape _ = return Z
