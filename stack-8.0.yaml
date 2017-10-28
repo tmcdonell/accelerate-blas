@@ -7,9 +7,9 @@ packages:
 - '.'
 
 extra-deps:
-- 'accelerate-1.1.0.0'
+- 'accelerate-1.1.1.0'
 - 'accelerate-llvm-1.1.0.0'
-- 'accelerate-llvm-native-1.1.0.0'
+- 'accelerate-llvm-native-1.1.0.1'
 - 'accelerate-llvm-ptx-1.1.0.0'
 - 'blas-hs-0.1.1.0'
 - 'Cabal-2.0.0.2'
