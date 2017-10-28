@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP               #-}
 {-# LANGUAGE ConstraintKinds   #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -58,9 +59,11 @@ type family NumericBaseT t where
   NumericBaseT (Complex Double) = Double
 
 
+#if !MIN_VERSION_accelerate(1,2,0)
 -- | Matrices as dense two-dimensional arrays in row-major ordering
 --
 type Matrix e = Array DIM2 e
+#endif
 
 -- | Orientation of the underlying data.
 --
