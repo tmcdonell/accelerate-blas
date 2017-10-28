@@ -115,7 +115,7 @@ script:
         travis_retry cabal install
         travis_retry cabal haddock
       else
-        travis_retry stack build --fast ---jobs=2 -no-terminal --haddock --no-haddock-deps
+        travis_retry stack build --fast --jobs=2 --no-terminal --haddock --no-haddock-deps
       fi
 
 after_success:
