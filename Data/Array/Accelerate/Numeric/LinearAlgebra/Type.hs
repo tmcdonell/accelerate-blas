@@ -14,8 +14,14 @@
 -- Portability : non-portable (GHC extensions)
 --
 
-module Data.Array.Accelerate.Numeric.LinearAlgebra.Type
-  where
+module Data.Array.Accelerate.Numeric.LinearAlgebra.Type (
+
+#if MIN_VERSION_accelerate(1,2,0)
+  Matrix,
+#endif
+  module Data.Array.Accelerate.Numeric.LinearAlgebra.Type,
+
+) where
 
 import Data.Array.Accelerate                                        as A
 import Data.Array.Accelerate.Data.Complex                           as A
