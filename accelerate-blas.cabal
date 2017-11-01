@@ -164,23 +164,21 @@ test-suite test-llvm-ptx
       Test.Util
 
 
-benchmark accelerate-blas-bench
+benchmark bench-hmatrix
   default-language:     Haskell2010
   type:                 exitcode-stdio-1.0
   hs-source-dirs:       bench
-  main-is:              Main.hs
-  other-modules:
-      Accelerate
-      Extra
-      HMatrix
+  main-is:              BenchHMatrix.hs
+  ghc-options:          -main-is BenchHMatrix
+
+  -- don't bother if we aren't building one of the real backends
+  if !flag(llvm-cpu) && !flag(llvm-ptx)
+    buildable: False
 
   build-depends:
         base                            >= 4.7 && < 4.11
-      , accelerate
-      , accelerate-blas
       , criterion                       >= 1.0
       , mwc-random                      >= 0.8
-      , mwc-random-accelerate           >= 0.1
       , deepseq                         >= 1.0
       , hmatrix                         >= 0.17
 
@@ -191,15 +189,67 @@ benchmark accelerate-blas-bench
       -threaded
       -with-rtsopts=-N
 
-  if flag(llvm-cpu)
-    CPP-options:        -DACCELERATE_LLVM_NATIVE_BACKEND
-    build-depends:
-        accelerate-llvm-native          >= 1.1 && < 1.3
+  other-modules:
+      Bench.Util
+      Bench.HMatrix
 
-  if flag(llvm-ptx)
-    CPP-options:        -DACCELERATE_LLVM_PTX_BACKEND
-    build-depends:
-        accelerate-llvm-ptx             >= 1.1 && < 1.3
+benchmark bench-llvm-native
+  default-language:     Haskell2010
+  type:                 exitcode-stdio-1.0
+  hs-source-dirs:       bench
+  main-is:              BenchNative.hs
+  ghc-options:          -main-is BenchNative
+
+  if !flag(llvm-cpu)
+    buildable: False
+
+  build-depends:
+        base                            >= 4.7 && < 4.11
+      , accelerate
+      , accelerate-blas
+      , accelerate-llvm-native
+      , criterion                       >= 1.0
+      , mwc-random                      >= 0.8
+      , mwc-random-accelerate           >= 0.1
+
+  ghc-options:
+      -O2
+      -Wall
+      -rtsopts
+      -threaded
+
+  other-modules:
+      Bench.Util
+      Bench.Accelerate
+
+benchmark bench-llvm-ptx
+  default-language:     Haskell2010
+  type:                 exitcode-stdio-1.0
+  hs-source-dirs:       bench
+  main-is:              BenchPTX.hs
+  ghc-options:          -main-is BenchPTX
+
+  if !flag(llvm-ptx)
+    buildable: False
+
+  build-depends:
+        base                            >= 4.7 && < 4.11
+      , accelerate
+      , accelerate-blas
+      , accelerate-llvm-ptx
+      , criterion                       >= 1.0
+      , mwc-random                      >= 0.8
+      , mwc-random-accelerate           >= 0.1
+
+  ghc-options:
+      -O2
+      -Wall
+      -rtsopts
+      -threaded
+
+  other-modules:
+      Bench.Util
+      Bench.Accelerate
 
 
 source-repository head

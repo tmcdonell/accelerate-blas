@@ -1,11 +1,19 @@
 {-# LANGUAGE FlexibleContexts    #-}
 {-# LANGUAGE FlexibleInstances   #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PolyKinds           #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+-- |
+-- Module      : Bench.Util
+-- Copyright   : [2017] Trevor L. McDonell
+-- License     : BSD3
+--
+-- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
 
-module Extra
-  where
+module Bench.Util where
 
 import Data.Complex
 import System.Random.MWC
@@ -18,8 +26,8 @@ showType _ = show (AT :: ArgType a)
 
 instance Show (ArgType Float)            where show _ = "Float"
 instance Show (ArgType Double)           where show _ = "Double"
-instance Show (ArgType (Complex Float))  where show _ = "ComplexFloat"
-instance Show (ArgType (Complex Double)) where show _ = "ComplexDouble"
+instance Show (ArgType (Complex Float))  where show _ = "Complex Float"
+instance Show (ArgType (Complex Double)) where show _ = "Complex Double"
 
 instance Variate e => Variate (Complex e) where
   uniform    gen = (:+) <$> uniform gen <*> uniform gen

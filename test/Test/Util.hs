@@ -14,8 +14,7 @@
 -- Portability : non-portable (GHC extensions)
 --
 
-module Test.Util
-  where
+module Test.Util where
 
 import Data.Array.Accelerate                                        ( Shape, Arrays, Acc )
 import Data.Array.Accelerate.Trafo                                  ( Afunction, AfunctionR )

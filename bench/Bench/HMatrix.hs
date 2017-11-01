@@ -2,14 +2,20 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PolyKinds           #-}
 {-# LANGUAGE RankNTypes          #-}
+-- |
+-- Module      : Bench.HMatrix
+-- Copyright   : [2017] Trevor L. McDonell
+-- License     : BSD3
+--
+-- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
+-- Stability   : experimental
+-- Portability : non-portable (GHC extensions)
+--
 
-module HMatrix (
+module Bench.HMatrix ( bench_hmatrix )
+  where
 
-  benchHMatrix
-
-) where
-
-import Extra
+import Bench.Util
 
 import Control.DeepSeq
 import Criterion.Main
@@ -20,16 +26,14 @@ import System.Random.MWC
 import Text.Printf
 
 
-benchHMatrix :: Benchmark
-benchHMatrix =
-  bgroup "hmatrix"
-    [ level2
-    , level3
-    ]
+bench_hmatrix :: [Benchmark]
+bench_hmatrix =
+  [ bench_level2
+  , bench_level3
+  ]
 
-
-level2 :: Benchmark
-level2 =
+bench_level2 :: Benchmark
+bench_level2 =
   bgroup "matrix-vector"
     [ bgroup "(#>)"
       [ gemv  200  400
@@ -75,8 +79,8 @@ level2 =
       in
       bgroup (printf "%dx%d" m n) (sdcz go)
 
-level3 :: Benchmark
-level3 =
+bench_level3 :: Benchmark
+bench_level3 =
   bgroup "matrix-matrix"
     [ bgroup "(<>)"
       [ gemm  100  100  100
