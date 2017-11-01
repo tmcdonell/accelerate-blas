@@ -1,5 +1,5 @@
 name:                   accelerate-blas
-version:                0.1.0.1
+version:                0.2.0.0
 synopsis:               Numeric Linear Algebra in Accelerate
 description:
   Linear systems, matrix decompositions, and other numerical computations for
@@ -103,41 +103,65 @@ library
       Data.Array.Accelerate.Numeric.Sum.LLVM.Prim
 
 
-test-suite accelerate-blas-test
-  default-language:     Haskell2010
+test-suite test-llvm-native
   type:                 exitcode-stdio-1.0
+  default-language:     Haskell2010
   hs-source-dirs:       test
-  main-is:              Main.hs
-  other-modules:
-      Backend
-      Hedgehog.Gen.Array
-      Hedgehog.Gen.Shape
-      Level2
-      Level3
-      Similar
+  main-is:              TestNative.hs
+  ghc-options:          -main-is TestNative
+
+  if !flag(llvm-cpu)
+    buildable: False
 
   build-depends:
-      base                            >= 4.7 && < 4.11
-    , accelerate                      >= 1.0 && < 1.3
-    , accelerate-blas
-    , hedgehog                        >= 0.5
+        base                    >= 4.7  && < 4.11
+      , accelerate              >= 1.2
+      , accelerate-blas
+      , accelerate-llvm-native
+      , hedgehog                >= 0.5
+      , tasty                   >= 0.11
+      , tasty-hedgehog          >= 0.1
 
   ghc-options:
-      -O2
-      -Wall
-      -rtsopts
-      -threaded
-      -with-rtsopts=-N
+        -Wall
+        -threaded
+        -rtsopts
 
-  if flag(llvm-cpu)
-    CPP-options:        -DACCELERATE_LLVM_NATIVE_BACKEND
-    build-depends:
-        accelerate-llvm-native        >= 1.1 && < 1.3
+  other-modules:
+      Test.BLAS
+      Test.BLAS.Level2
+      Test.BLAS.Level3
+      Test.Util
 
-  if flag(llvm-ptx)
-    CPP-options:        -DACCELERATE_LLVM_PTX_BACKEND
-    build-depends:
-        accelerate-llvm-ptx           >= 1.1 && < 1.3
+test-suite test-llvm-ptx
+  type:                 exitcode-stdio-1.0
+  default-language:     Haskell2010
+  hs-source-dirs:       test
+  main-is:              TestPTX.hs
+  ghc-options:          -main-is TestPTX
+
+  if !flag(llvm-ptx)
+    buildable: False
+
+  build-depends:
+        base                    >= 4.7  && < 4.11
+      , accelerate              >= 1.2
+      , accelerate-blas
+      , accelerate-llvm-ptx
+      , hedgehog                >= 0.5
+      , tasty                   >= 0.11
+      , tasty-hedgehog          >= 0.1
+
+  ghc-options:
+        -Wall
+        -threaded
+        -rtsopts
+
+  other-modules:
+      Test.BLAS
+      Test.BLAS.Level2
+      Test.BLAS.Level3
+      Test.Util
 
 
 benchmark accelerate-blas-bench
@@ -152,7 +176,7 @@ benchmark accelerate-blas-bench
 
   build-depends:
         base                            >= 4.7 && < 4.11
-      , accelerate                      >= 1.0 && < 1.3
+      , accelerate
       , accelerate-blas
       , criterion                       >= 1.0
       , mwc-random                      >= 0.8
@@ -177,13 +201,14 @@ benchmark accelerate-blas-bench
     build-depends:
         accelerate-llvm-ptx             >= 1.1 && < 1.3
 
+
 source-repository head
   type:     git
   location: https://github.com/tmcdonell/accelerate-blas
 
 source-repository this
   type:     git
-  tag:      0.1.0.1
+  tag:      0.2.0.0
   location: https://github.com/tmcdonell/accelerate-blas
 
 -- vim: nospell

@@ -6,6 +6,20 @@ resolver: nightly-2017-10-28
 packages:
 - '.'
 
+- location:
+    git:    https://github.com/tmcdonell/accelerate.git
+    commit: b73188966e43c4279cf7522d9309f2d90f86eb12
+  extra-dep: true
+
+- location:
+    git:    https://github.com/tmcdonell/accelerate-llvm.git
+    commit: ed24942cdebfdab34c8214296d85cc08f3111e43
+  extra-dep: true
+  subdirs:
+    - accelerate-llvm
+    - accelerate-llvm-native
+    - accelerate-llvm-ptx
+
 extra-deps: []
 
 # Override default flag values for local packages and extra-deps
@@ -13,7 +27,7 @@ flags: {}
 
 # Extra global and per-package GHC options
 ghc-options:
-  '*': -fdiagnostics-color=always
+  "*": -fdiagnostics-color=always
 
 # Extra package databases containing global packages
 extra-package-dbs: []
