@@ -16,11 +16,10 @@
 
 module Test.Util where
 
-import Data.Array.Accelerate                                        ( Shape, Arrays, Acc )
+import Data.Array.Accelerate                                        ( Acc, Arrays, Array, Shape, Elt, fromList )
+import Data.Array.Accelerate.Array.Sugar                            ( size )
 import Data.Array.Accelerate.Trafo                                  ( Afunction, AfunctionR )
-import Data.Array.Accelerate.Array.Sugar                            ( rank )
 import Data.Array.Accelerate.Data.Complex
-import qualified Data.Array.Accelerate.Hedgehog.Gen.Shape           as Gen
 
 import Hedgehog
 import qualified Hedgehog.Gen                                       as Gen
@@ -37,8 +36,6 @@ floating = Gen.realFloat (Range.linearFracFrom 0 (-1) 1)
 complex :: Gen a -> Gen (Complex a)
 complex f = (:+) <$> f <*> f
 
-shape :: forall sh. (Gen.Shape sh, Shape sh) => Gen sh
-shape = Gen.shape (Range.linear 1 (512 `quot` (2 ^ r)))
-  where
-    r = rank (undefined::sh)
+array :: (Shape sh, Elt e) => sh -> Gen e -> Gen (Array sh e)
+array sh gen = fromList sh <$> Gen.list (Range.singleton (size sh)) gen
 

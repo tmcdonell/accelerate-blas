@@ -12,13 +12,12 @@
 module Test.BLAS.Level2 ( test_level2 )
   where
 
-import Test.Util
+import Test.Util                                                    as Gen
 
 import Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level2
 
 import Data.Array.Accelerate                                        as A
-import Data.Array.Accelerate.Hedgehog.Similar
-import qualified Data.Array.Accelerate.Hedgehog.Gen.Array           as Gen
+import Data.Array.Accelerate.Test.Similar
 import qualified Data.Array.Accelerate.Interpreter                  as I
 
 import Hedgehog
