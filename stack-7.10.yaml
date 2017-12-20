@@ -6,25 +6,17 @@ resolver: lts-6.30
 packages:
 - '.'
 
-- location:
-    git:    https://github.com/tmcdonell/accelerate.git
-    commit: 71a30b76b34d33d31ffcc20ac0b2be21f6ced3be
-  extra-dep: true
+extra-deps:
+- git:    https://github.com/tmcdonell/accelerate.git
+  commit: c6d87eeec0974b6cb39ecba60628a8dd52331812
 
-- location:
-    git:    https://github.com/tmcdonell/accelerate-llvm.git
-    commit: 0c86f27ee1206c03b2be05d4c7d83ec51e0e883e
-  extra-dep: true
+- git:    https://github.com/tmcdonell/accelerate-llvm.git
+  commit: 62f2f658a4ae1f71e8046bbf883b7dad35401824
   subdirs:
     - accelerate-llvm
     - accelerate-llvm-native
     - accelerate-llvm-ptx
 
-extra-deps:
-# - 'accelerate-1.1.1.0'
-# - 'accelerate-llvm-1.1.0.0'
-# - 'accelerate-llvm-native-1.1.0.1'
-# - 'accelerate-llvm-ptx-1.1.0.0'
 - 'blas-hs-0.1.1.0'
 - 'Cabal-2.0.0.2'
 - 'cabal-doctest-1.0.2'
