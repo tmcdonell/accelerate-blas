@@ -55,7 +55,7 @@ module Data.Array.Accelerate.Numeric.Sum (
 
 ) where
 
-import Data.Array.Accelerate                                        as A hiding ( sum )
+import Data.Array.Accelerate                                        as A hiding ( sum, fromInteger )
 import Data.Array.Accelerate.Type                                   as A
 import Data.Array.Accelerate.Smart                                  as A ( Exp(..), PreExp(..) )
 import Data.Array.Accelerate.Product                                as A
