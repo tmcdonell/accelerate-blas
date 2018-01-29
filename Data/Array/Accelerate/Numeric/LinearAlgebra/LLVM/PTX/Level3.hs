@@ -20,8 +20,6 @@ import Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Context
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 
 import Foreign.Marshal                                              ( with )
-import Foreign.Storable.Complex                                     ( )
-
 import qualified Foreign.CUDA.Ptr                                   as CUDA
 import qualified Foreign.CUDA.BLAS                                  as BLAS
 
