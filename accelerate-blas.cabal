@@ -21,8 +21,6 @@ cabal-version:          >=1.10
 extra-source-files:
     README.md
     CHANGELOG.md
-    cubits/twine_f32.ptx
-    cubits/twine_f64.ptx
 
 Flag llvm-cpu
   Description:          Enable the LLVM backend for multicore CPUs
@@ -69,10 +67,6 @@ library
       -Wall
       -march=native
 
-    c-sources:
-      cbits/twine_f32.c
-      cbits/twine_f64.c
-
     other-modules:
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level2
@@ -97,7 +91,6 @@ library
     other-modules:
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Base
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Context
-      Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Twine
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level2
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level3
       Data.Array.Accelerate.Numeric.Sum.LLVM.Prim

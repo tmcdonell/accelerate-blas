@@ -15,12 +15,10 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level2
 
 import Data.Array.Accelerate                                        as A
 import Data.Array.Accelerate.Array.Sugar                            ( Array(..) )
-import Data.Array.Accelerate.Data.Complex
 import Data.Array.Accelerate.LLVM.PTX.Foreign
 import Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Base
 import Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Context
 import Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level3
-import Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Twine
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 
 import Foreign.Marshal                                              ( with )
@@ -75,9 +73,7 @@ as_gemv
 as_gemv opA stream (alpha, matA, vecx) = do
   let
       Z :. rowsA :. colsA = arrayShape matA
-      Z :. sizeX          = arrayShape vecx
 
-      sizeA   = rowsA * colsA
       sizeY   = case opA of
                   N -> rowsA
                   _ -> colsA
@@ -105,27 +101,15 @@ as_gemv opA stream (alpha, matA, vecx) = do
              with 0     $ \ptr_beta  ->
                BLAS.dgemv hdl opA' colsA rowsA ptr_alpha ptr_A colsA ptr_x 1 ptr_beta ptr_y 1
 
-           NumericRcomplex32 -> do
-            tmpy <- allocateRemote (Z :. sizeY * 2) :: LLVM PTX (Vector Float)
-            withArray tmpy stream           $ \ptr_y' -> do
-             interleave ptr_A stream sizeA  $ \ptr_A' -> do
-              interleave ptr_x stream sizeX $ \ptr_x' -> do
-               liftIO $ do
-                with alpha' $ \ptr_alpha ->
-                 with 0     $ \ptr_beta  -> do
-                  BLAS.cgemv hdl opA' colsA rowsA ptr_alpha ptr_A' colsA ptr_x' 1 ptr_beta (CUDA.castDevPtr ptr_y' :: CUDA.DevicePtr (Complex Float))  1
-               deinterleave ptr_y (CUDA.castDevPtr ptr_y' :: CUDA.DevicePtr (Complex Float)) stream sizeY
+           NumericRcomplex32 -> liftIO $
+            with alpha' $ \ptr_alpha ->
+             with 0     $ \ptr_beta  ->
+               BLAS.cgemv hdl opA' colsA rowsA ptr_alpha (CUDA.castDevPtr ptr_A) colsA (CUDA.castDevPtr ptr_x) 1 ptr_beta (CUDA.castDevPtr ptr_y)  1
 
-           NumericRcomplex64 -> do
-            tmpy <- allocateRemote (Z :. sizeY * 2) :: LLVM PTX (Vector Double)
-            withArray tmpy stream           $ \ptr_y' -> do
-             interleave ptr_A stream sizeA  $ \ptr_A' -> do
-              interleave ptr_x stream sizeX $ \ptr_x' -> do
-               liftIO $ do
-                with alpha' $ \ptr_alpha ->
-                 with 0     $ \ptr_beta  -> do
-                  BLAS.zgemv hdl opA' colsA rowsA ptr_alpha ptr_A' colsA ptr_x' 1 ptr_beta (CUDA.castDevPtr ptr_y' :: CUDA.DevicePtr (Complex Double))  1
-               deinterleave ptr_y (CUDA.castDevPtr ptr_y' :: CUDA.DevicePtr (Complex Double)) stream sizeY
+           NumericRcomplex64 -> liftIO $
+            with alpha' $ \ptr_alpha ->
+             with 0     $ \ptr_beta  ->
+               BLAS.zgemv hdl opA' colsA rowsA ptr_alpha (CUDA.castDevPtr ptr_A) colsA (CUDA.castDevPtr ptr_x) 1 ptr_beta (CUDA.castDevPtr ptr_y)  1
   --
   return vecy
 
