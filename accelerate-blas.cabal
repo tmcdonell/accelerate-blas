@@ -64,11 +64,6 @@ library
       , blas-hs                         >= 0.1
       , llvm-hs-pure                    >= 4.1
 
-    cc-options:
-      -O3
-      -Wall
-      -march=native
-
     other-modules:
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level2
