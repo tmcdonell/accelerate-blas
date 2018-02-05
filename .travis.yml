@@ -98,7 +98,8 @@ install:
   - travis_retry travis_wait 60 stack build --only-dependencies --fast --jobs=2 --no-terminal --no-haddock-deps
 
 script:
-  - travis_retry stack build --fast --jobs=2 --no-terminal --haddock --no-haddock-deps
+  - stack build --fast --jobs=2 --no-terminal --haddock --no-haddock-deps
+  - stack test accelerate-blas:test-llvm-native --test-arguments='--hedgehog-tests 50'
 
 after_success:
   - source .travis/update-accelerate-buildbot.sh
