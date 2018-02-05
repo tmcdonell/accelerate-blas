@@ -13,10 +13,11 @@
 module Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Base
   where
 
-import Data.Array.Accelerate.Lifetime
-import Data.Array.Accelerate.Array.Sugar                            ( Array(..), EltRepr )
 import Data.Array.Accelerate.Array.Data
+import Data.Array.Accelerate.Array.Sugar                            ( Array(..), EltRepr )
+import Data.Array.Accelerate.Lifetime
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
+import Data.Array.Accelerate.Type
 
 import Data.Array.Accelerate.LLVM.PTX.Foreign
 
@@ -25,10 +26,10 @@ import qualified Foreign.CUDA.BLAS                                  as C
 
 
 type family DevicePtrs e :: *
-type instance DevicePtrs ()     = ()
-type instance DevicePtrs Float  = DevicePtr Float
-type instance DevicePtrs Double = DevicePtr Double
-type instance DevicePtrs (a,b)  = (DevicePtrs a, DevicePtrs b)
+type instance DevicePtrs Float       = DevicePtr Float
+type instance DevicePtrs Double      = DevicePtr Double
+type instance DevicePtrs (V2 Float)  = DevicePtr Float
+type instance DevicePtrs (V2 Double) = DevicePtr Double
 
 
 encodeTranspose :: Transpose -> C.Operation
@@ -61,18 +62,17 @@ withArrayData NumericRfloat64 ad s k =
     r <- k p
     e <- checkpoint s
     return (Just e, r)
-withArrayData NumericRcomplex32 (AD_Pair (AD_Pair AD_Unit ad1) ad2) s k =
-  withDevicePtr ad1 $ \p1 ->
-  withDevicePtr ad2 $ \p2 -> do
-    r <- k (((), p1), p2)
+withArrayData NumericRcomplex32 (AD_V2 ad) s k =
+  withDevicePtr ad $ \p -> do
+    r <- k p
     e <- checkpoint s
-    return (Just e, (Just e, r))
-withArrayData NumericRcomplex64 (AD_Pair (AD_Pair AD_Unit ad1) ad2) s k =
-  withDevicePtr ad1 $ \p1 ->
-  withDevicePtr ad2 $ \p2 -> do
-    r <- k (((), p1), p2)
+    return (Just e,r)
+withArrayData NumericRcomplex64 (AD_V2 ad) s k =
+  withDevicePtr ad $ \p -> do
+    r <- k p
     e <- checkpoint s
-    return (Just e, (Just e, r))
+    return (Just e, r)
+
 
 withLifetime' :: Lifetime a -> (a -> LLVM PTX b) -> LLVM PTX b
 withLifetime' l k = do

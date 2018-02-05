@@ -14,15 +14,11 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level3
   where
 
 import Data.Array.Accelerate                                        as A
-import Data.Array.Accelerate.Data.Complex
 import Data.Array.Accelerate.LLVM.Native.Foreign
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 import Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
 
-import Foreign.Marshal.Alloc
-import Foreign.Storable
-import Foreign.Storable.Complex                                     ( )
-
+import Foreign.Ptr
 import qualified Blas.Primitive.Types                               as C
 import qualified Blas.Primitive.Unsafe                              as C
 
@@ -41,10 +37,6 @@ gemm opA opB = ForeignAcc "native.gemm" gemm'
       let
           Z :. rowsA :. colsA = arrayShape matA
           Z :. rowsB :. colsB = arrayShape matB
-
-          sizeA   = rowsA * colsA
-          sizeB   = rowsB * colsB
-          sizeC   = m * n
 
           (m,k)   = case opA of
                       N -> (rowsA, colsA)
@@ -68,20 +60,8 @@ gemm opA opB = ForeignAcc "native.gemm" gemm'
             case numericR :: NumericR e of
               NumericRfloat32   -> C.sgemm C.RowMajor opA' opB' m n k alpha' ptr_A lda ptr_B ldb 0 ptr_C n
               NumericRfloat64   -> C.dgemm C.RowMajor opA' opB' m n k alpha' ptr_A lda ptr_B ldb 0 ptr_C n
-              --
-              NumericRcomplex32 -> do
-               allocaBytesAligned (sizeC * sizeOf (undefined::Complex e)) 16 $ \ptr_C' -> do
-                interleave ptr_A sizeA $ \ptr_A' -> do
-                 interleave ptr_B sizeB $ \ptr_B' -> do
-                  C.cgemm C.RowMajor opA' opB' m n k alpha' ptr_A' lda ptr_B' ldb 0 ptr_C' n
-                  deinterleave ptr_C ptr_C' sizeC
-              --
-              NumericRcomplex64 -> do
-               allocaBytesAligned (sizeC * sizeOf (undefined::Complex e)) 16 $ \ptr_C' -> do
-                interleave ptr_A sizeA $ \ptr_A' -> do
-                 interleave ptr_B sizeB $ \ptr_B' -> do
-                  C.zgemm C.RowMajor opA' opB' m n k alpha' ptr_A' lda ptr_B' ldb 0 ptr_C' n
-                  deinterleave ptr_C ptr_C' sizeC
+              NumericRcomplex32 -> C.cgemm C.RowMajor opA' opB' m n k alpha' (castPtr ptr_A) lda (castPtr ptr_B) ldb 0 (castPtr ptr_C) n
+              NumericRcomplex64 -> C.zgemm C.RowMajor opA' opB' m n k alpha' (castPtr ptr_A) lda (castPtr ptr_B) ldb 0 (castPtr ptr_C) n
       --
       return matC
 

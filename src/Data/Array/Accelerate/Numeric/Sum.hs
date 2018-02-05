@@ -151,8 +151,8 @@ instance Summation KBN CDouble where
 type instance EltRepr (KBN a) = (((), EltRepr a), EltRepr a)
 
 instance Elt a => Elt (KBN a) where
-  eltType _ = UnitTuple `PairTuple` eltType (undefined::a)
-                        `PairTuple` eltType (undefined::a)
+  eltType _ = TypeRunit `TypeRpair` eltType (undefined::a)
+                        `TypeRpair` eltType (undefined::a)
   toElt (((),a),b)  = KBN (toElt a) (toElt b)
   fromElt (KBN a b) = (((), fromElt a), fromElt b)
 
@@ -233,9 +233,9 @@ instance Summation KB2 CDouble where
 type instance EltRepr (KB2 a) = ((((), EltRepr a), EltRepr a), EltRepr a)
 
 instance Elt a => Elt (KB2 a) where
-  eltType _ = UnitTuple `PairTuple` eltType (undefined::a)
-                        `PairTuple` eltType (undefined::a)
-                        `PairTuple` eltType (undefined::a)
+  eltType _ = TypeRunit `TypeRpair` eltType (undefined::a)
+                        `TypeRpair` eltType (undefined::a)
+                        `TypeRpair` eltType (undefined::a)
   toElt ((((),a),b),c) = KB2 (toElt a) (toElt b) (toElt c)
   fromElt (KB2 a b c)  = ((((), fromElt a), fromElt b), fromElt c)
 
@@ -308,8 +308,8 @@ instance Summation Kahan CDouble where
 type instance EltRepr (Kahan a) = (((), EltRepr a), EltRepr a)
 
 instance Elt a => Elt (Kahan a) where
-  eltType _ = UnitTuple `PairTuple` eltType (undefined::a)
-                        `PairTuple` eltType (undefined::a)
+  eltType _ = TypeRunit `TypeRpair` eltType (undefined::a)
+                        `TypeRpair` eltType (undefined::a)
   toElt (((),a),b)    = Kahan (toElt a) (toElt b)
   fromElt (Kahan a b) = (((), fromElt a), fromElt b)
 

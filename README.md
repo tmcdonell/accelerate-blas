@@ -18,12 +18,6 @@ added to the library. Contributions are also welcome!
 
   * **accelerate-llvm-ptx:** FFI bindings to the NVIDIA [cuBLAS] library.
 
-## Complex numbers
-
-Due to Accelerate's struct-of-array representation of complex numbers, compared
-to the C-style array-of-struct representation, calling foreign implementations
-of complex-valued operations entails an extra data marshalling step.
-
 
   [GitHub]:     https://github.com/AccelerateHS/accelerate
   [blas-hs]:    http://hackage.haskell.org/package/blas-hs
