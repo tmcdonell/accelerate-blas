@@ -19,10 +19,9 @@ addons:
       - hvr-ghc
       - ubuntu-toolchain-r-test
       - llvm-toolchain-trusty
-      - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-4.0 main'
-        key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
-      - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-5.0 main'
-        key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
+      - llvm-toolchain-trusty-4.0
+      - llvm-toolchain-trusty-5.0
+      - llvm-toolchain-trusty-6.0
 
     packages: &apt_packages
       - g++-4.8
@@ -64,6 +63,16 @@ matrix:
             - cabal-install-2.0
             - llvm-5.0-dev
 
+    - env: GHC=8.4.1 CABAL=2.0 LLVM=6.0.0 CUDA=8.0.61-1
+      compiler: "GHC 8.4"
+      addons:
+        apt:
+          sources: *apt_sources
+          packages:
+            - *apt_packages
+            - cabal-install-2.0
+            - llvm-6.0-dev
+
     # - env: GHC=head CABAL=head LLVM=3.9.1
     #   compiler: "GHC HEAD"
     #   addons: { apt: { sources: [ hvr-ghc, ubuntu-toolchain-r-test ], packages: [ nvidia-cuda-toolkit, g++-4.8, ghc-head, cabal-install-head, happy-1.19.5, alex-3.1.7 ] }}
@@ -89,13 +98,18 @@ before_install:
   - travis_retry stack install c2hs --fast --no-terminal
 
 install:
-  - echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
+  - echo "$(stack exec ghc -- --version) [$(stack exec ghc -- --print-project-git-commit-id 2> /dev/null || echo '?')]"
   - cabal --version
   - stack --version
   - c2hs --version
-  - llc --version; true
-  - opt --version; true
-  - travis_retry travis_wait 60 stack build --only-dependencies --fast --jobs=2 --no-terminal --no-haddock-deps
+  - llc-${LLVM:0:3} --version; true
+  - opt-${LLVM:0:3} --version; true
+
+  # how much do we have to do?
+  - stack build --no-terminal --dry-run
+
+  # build dependencies
+  - travis_retry travis_wait 60 stack build --only-dependencies --fast --jobs=2 --no-terminal
 
 script:
   - stack build --fast --jobs=2 --no-terminal --haddock --no-haddock-deps
