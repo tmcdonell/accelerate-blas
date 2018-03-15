@@ -46,7 +46,7 @@ library
     Data.Array.Accelerate.Numeric.Sum.LLVM.PTX
 
   build-depends:
-        base                            >= 4.7 && < 4.11
+        base                            >= 4.7 && < 4.12
       , accelerate                      >= 1.0 && < 1.3
 
   hs-source-dirs:
@@ -62,14 +62,13 @@ library
         accelerate-llvm                 >= 1.1 && < 1.3
       , accelerate-llvm-native          >= 1.1 && < 1.3
       , blas-hs                         >= 0.1
-      , llvm-hs-pure                    >= 4.1
+      , llvm-hs-pure                    >= 4.1 && < 6.1
 
     other-modules:
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level2
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level3
       Data.Array.Accelerate.Numeric.Sum.LLVM.Prim
-
 
   if flag(llvm-ptx)
     CPP-options:        -DACCELERATE_LLVM_PTX_BACKEND
@@ -81,7 +80,7 @@ library
       , cublas                          >= 0.3
       , cuda                            >= 0.8
       , file-embed                      >= 0.0.10
-      , llvm-hs-pure                    >= 4.1
+      , llvm-hs-pure                    >= 4.1 && < 6.1
       , mtl                             >= 2.2
 
     other-modules:
@@ -103,7 +102,7 @@ test-suite test-llvm-native
     buildable: False
 
   build-depends:
-        base                    >= 4.7  && < 4.11
+        base                    >= 4.7  && < 4.12
       , accelerate              >= 1.2
       , accelerate-blas
       , accelerate-llvm-native
@@ -133,7 +132,7 @@ test-suite test-llvm-ptx
     buildable: False
 
   build-depends:
-        base                    >= 4.7  && < 4.11
+        base                    >= 4.7  && < 4.12
       , accelerate              >= 1.2
       , accelerate-blas
       , accelerate-llvm-ptx
@@ -165,7 +164,7 @@ benchmark bench-hmatrix
     buildable: False
 
   build-depends:
-        base                            >= 4.7 && < 4.11
+        base                            >= 4.7 && < 4.12
       , criterion                       >= 1.0
       , mwc-random                      >= 0.8
       , deepseq                         >= 1.0
@@ -193,7 +192,7 @@ benchmark bench-llvm-native
     buildable: False
 
   build-depends:
-        base                            >= 4.7 && < 4.11
+        base                            >= 4.7 && < 4.12
       , accelerate
       , accelerate-blas
       , accelerate-llvm-native
@@ -222,7 +221,7 @@ benchmark bench-llvm-ptx
     buildable: False
 
   build-depends:
-        base                            >= 4.7 && < 4.11
+        base                            >= 4.7 && < 4.12
       , accelerate
       , accelerate-blas
       , accelerate-llvm-ptx

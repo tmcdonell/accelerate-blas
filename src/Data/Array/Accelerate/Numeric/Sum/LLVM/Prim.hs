@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP             #-}
 {-# LANGUAGE GADTs           #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ViewPatterns    #-}
@@ -63,7 +64,11 @@ md :: InstructionMetadata
 md = []
 
 fmf :: FastMathFlags
+#if MIN_VERSION_llvm_hs_pure(6,0,0)
+fmf = noFastMathFlags
+#else
 fmf = NoFastMathFlags
+#endif
 
 fresh :: CodeGen Name
 fresh = downcast <$> freshName
