@@ -108,13 +108,17 @@ install:
   # how much do we have to do?
   - stack build --no-terminal --dry-run
 
+  # bootstrap
+  - travis_retry travis_wait 60 stack build --only-dependencies --fast --jobs=2 --no-terminal accelerate
+
   # build dependencies
-  - travis_retry travis_wait 60 stack build --only-dependencies --fast --jobs=2 --no-terminal
+  # - travis_retry travis_wait 60 stack build --only-dependencies --fast --jobs=2 --no-terminal
 
 script:
-  - stack build --fast --jobs=2 --no-terminal --haddock --no-haddock-deps
-  - stack test accelerate-blas:test-llvm-native --test-arguments='--hedgehog-tests 50'
+  - true
+  # - stack build --fast --jobs=2 --no-terminal --haddock --no-haddock-deps
+  # - stack test accelerate-blas:test-llvm-native --test-arguments='--hedgehog-tests 50'
 
-after_success:
-  - source .travis/update-accelerate-buildbot.sh
+# after_success:
+#   - source .travis/update-accelerate-buildbot.sh
 
