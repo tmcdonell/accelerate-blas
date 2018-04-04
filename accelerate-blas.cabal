@@ -1,5 +1,5 @@
 name:                   accelerate-blas
-version:                0.1.0.1
+version:                0.2.0.0
 synopsis:               Numeric Linear Algebra in Accelerate
 description:
   Linear systems, matrix decompositions, and other numerical computations for
@@ -21,8 +21,6 @@ cabal-version:          >=1.10
 extra-source-files:
     README.md
     CHANGELOG.md
-    cubits/twine_f32.ptx
-    cubits/twine_f64.ptx
 
 Flag llvm-cpu
   Description:          Enable the LLVM backend for multicore CPUs
@@ -48,8 +46,11 @@ library
     Data.Array.Accelerate.Numeric.Sum.LLVM.PTX
 
   build-depends:
-        base                            >= 4.7 && < 4.11
-      , accelerate                      >= 1.0 && < 1.2
+        base                            >= 4.7 && < 4.12
+      , accelerate                      >= 1.0 && < 1.3
+
+  hs-source-dirs:
+      src
 
   ghc-options:
       -O2
@@ -58,20 +59,10 @@ library
   if flag(llvm-cpu)
     CPP-options:        -DACCELERATE_LLVM_NATIVE_BACKEND
     build-depends:
-        accelerate-llvm                 >= 1.0 && < 1.2
-      , accelerate-llvm-native          >= 1.0 && < 1.2
+        accelerate-llvm                 >= 1.1 && < 1.3
+      , accelerate-llvm-native          >= 1.1 && < 1.3
       , blas-hs                         >= 0.1
-      , llvm-hs-pure                    >= 4.0
-      , storable-complex                >= 0.2
-
-    cc-options:
-      -O3
-      -Wall
-      -march=native
-
-    c-sources:
-      cbits/twine_f32.c
-      cbits/twine_f64.c
+      , llvm-hs-pure                    >= 4.1 && < 6.1
 
     other-modules:
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
@@ -79,84 +70,103 @@ library
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Level3
       Data.Array.Accelerate.Numeric.Sum.LLVM.Prim
 
-
   if flag(llvm-ptx)
     CPP-options:        -DACCELERATE_LLVM_PTX_BACKEND
     build-depends:
-        accelerate-llvm                 >= 1.0 && < 1.2
-      , accelerate-llvm-ptx             >= 1.0 && < 1.2
+        accelerate-llvm                 >= 1.1 && < 1.3
+      , accelerate-llvm-ptx             >= 1.1 && < 1.3
       , bytestring                      >= 0.9
       , containers                      >= 0.5
       , cublas                          >= 0.3
       , cuda                            >= 0.8
       , file-embed                      >= 0.0.10
-      , llvm-hs-pure                    >= 4.0
+      , llvm-hs-pure                    >= 4.1 && < 6.1
       , mtl                             >= 2.2
-      , storable-complex                >= 0.2
 
     other-modules:
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Base
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Context
-      Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Twine
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level2
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.PTX.Level3
       Data.Array.Accelerate.Numeric.Sum.LLVM.Prim
 
 
-test-suite accelerate-blas-test
-  default-language:     Haskell2010
+test-suite test-llvm-native
   type:                 exitcode-stdio-1.0
+  default-language:     Haskell2010
   hs-source-dirs:       test
-  main-is:              Main.hs
-  other-modules:
-      Backend
-      Hedgehog.Gen.Array
-      Hedgehog.Gen.Shape
-      Level2
-      Level3
-      Similar
+  main-is:              TestNative.hs
+  ghc-options:          -main-is TestNative
+
+  if !flag(llvm-cpu)
+    buildable: False
 
   build-depends:
-      base                            >= 4.7 && < 4.11
-    , accelerate                      >= 1.0 && < 1.2
-    , accelerate-blas
-    , hedgehog                        >= 0.5
+        base                    >= 4.7  && < 4.12
+      , accelerate              >= 1.2
+      , accelerate-blas
+      , accelerate-llvm-native
+      , hedgehog                >= 0.5
+      , tasty                   >= 0.11
+      , tasty-hedgehog          >= 0.1
 
   ghc-options:
-      -O2
-      -Wall
-      -rtsopts
-      -threaded
-      -with-rtsopts=-N
+        -Wall
+        -threaded
+        -rtsopts
 
-  if flag(llvm-cpu)
-    CPP-options:        -DACCELERATE_LLVM_NATIVE_BACKEND
-    build-depends:
-        accelerate-llvm-native        >= 1.0 && < 1.2
+  other-modules:
+      Test.BLAS
+      Test.BLAS.Level2
+      Test.BLAS.Level3
+      Test.Util
 
-  if flag(llvm-ptx)
-    CPP-options:        -DACCELERATE_LLVM_PTX_BACKEND
-    build-depends:
-        accelerate-llvm-ptx           >= 1.0 && < 1.2
+test-suite test-llvm-ptx
+  type:                 exitcode-stdio-1.0
+  default-language:     Haskell2010
+  hs-source-dirs:       test
+  main-is:              TestPTX.hs
+  ghc-options:          -main-is TestPTX
+
+  if !flag(llvm-ptx)
+    buildable: False
+
+  build-depends:
+        base                    >= 4.7  && < 4.12
+      , accelerate              >= 1.2
+      , accelerate-blas
+      , accelerate-llvm-ptx
+      , hedgehog                >= 0.5
+      , tasty                   >= 0.11
+      , tasty-hedgehog          >= 0.1
+
+  ghc-options:
+        -Wall
+        -threaded
+        -rtsopts
+
+  other-modules:
+      Test.BLAS
+      Test.BLAS.Level2
+      Test.BLAS.Level3
+      Test.Util
 
 
-benchmark accelerate-blas-bench
+benchmark bench-hmatrix
   default-language:     Haskell2010
   type:                 exitcode-stdio-1.0
   hs-source-dirs:       bench
-  main-is:              Main.hs
-  other-modules:
-      Accelerate
-      Extra
-      HMatrix
+  main-is:              BenchHMatrix.hs
+  ghc-options:          -main-is BenchHMatrix
+
+  -- don't bother if we aren't building one of the real backends
+  if !flag(llvm-cpu) && !flag(llvm-ptx)
+    buildable: False
 
   build-depends:
-        base                            >= 4.7 && < 4.11
-      , accelerate                      >= 1.0 && < 1.2
-      , accelerate-blas
+        base                            >= 4.7 && < 4.12
       , criterion                       >= 1.0
       , mwc-random                      >= 0.8
-      , mwc-random-accelerate           >= 0.1
       , deepseq                         >= 1.0
       , hmatrix                         >= 0.17
 
@@ -167,15 +177,68 @@ benchmark accelerate-blas-bench
       -threaded
       -with-rtsopts=-N
 
-  if flag(llvm-cpu)
-    CPP-options:        -DACCELERATE_LLVM_NATIVE_BACKEND
-    build-depends:
-        accelerate-llvm-native          >= 1.0 && < 1.2
+  other-modules:
+      Bench.Util
+      Bench.HMatrix
 
-  if flag(llvm-ptx)
-    CPP-options:        -DACCELERATE_LLVM_PTX_BACKEND
-    build-depends:
-        accelerate-llvm-ptx             >= 1.0 && < 1.2
+benchmark bench-llvm-native
+  default-language:     Haskell2010
+  type:                 exitcode-stdio-1.0
+  hs-source-dirs:       bench
+  main-is:              BenchNative.hs
+  ghc-options:          -main-is BenchNative
+
+  if !flag(llvm-cpu)
+    buildable: False
+
+  build-depends:
+        base                            >= 4.7 && < 4.12
+      , accelerate
+      , accelerate-blas
+      , accelerate-llvm-native
+      , criterion                       >= 1.0
+      , mwc-random                      >= 0.8
+      , mwc-random-accelerate           >= 0.1
+
+  ghc-options:
+      -O2
+      -Wall
+      -rtsopts
+      -threaded
+
+  other-modules:
+      Bench.Util
+      Bench.Accelerate
+
+benchmark bench-llvm-ptx
+  default-language:     Haskell2010
+  type:                 exitcode-stdio-1.0
+  hs-source-dirs:       bench
+  main-is:              BenchPTX.hs
+  ghc-options:          -main-is BenchPTX
+
+  if !flag(llvm-ptx)
+    buildable: False
+
+  build-depends:
+        base                            >= 4.7 && < 4.12
+      , accelerate
+      , accelerate-blas
+      , accelerate-llvm-ptx
+      , criterion                       >= 1.0
+      , mwc-random                      >= 0.8
+      , mwc-random-accelerate           >= 0.1
+
+  ghc-options:
+      -O2
+      -Wall
+      -rtsopts
+      -threaded
+
+  other-modules:
+      Bench.Util
+      Bench.Accelerate
+
 
 source-repository head
   type:     git
@@ -183,7 +246,7 @@ source-repository head
 
 source-repository this
   type:     git
-  tag:      0.1.0.1
+  tag:      0.2.0.0
   location: https://github.com/tmcdonell/accelerate-blas
 
 -- vim: nospell

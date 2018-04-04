@@ -1,18 +1,16 @@
 # vim: nospell
 #
-language: generic
+language: minimal
 dist: trusty
 sudo: required
 
 cache:
   timeout: 600
   directories:
-    - $HOME/.stack
-    - $HOME/llvm
+    - $HOME/.stack/snapshots
     - .stack-work/install
 
 before_cache:
-  - rm -rf $(stack path --local-install-root)/bin
   - rm -rf $(stack path --local-install-root)/doc
 
 addons:
@@ -21,35 +19,20 @@ addons:
       - hvr-ghc
       - ubuntu-toolchain-r-test
       - llvm-toolchain-trusty
-      # - llvm-toolchain-precise-3.5
-      # - llvm-toolchain-precise-3.6
-      # - llvm-toolchain-precise-3.7
-      # - llvm-toolchain-precise-3.8
-      # - llvm-toolchain-precise-3.9
-      # - llvm-toolchain-precise-4.0  # not white-listed yet
-      - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-4.0 main'
-        key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
+      - llvm-toolchain-trusty-4.0
+      - llvm-toolchain-trusty-5.0
+      - llvm-toolchain-trusty-6.0
 
     packages: &apt_packages
       - g++-4.8
       - libgmp-dev
       - happy-1.19.5
       - alex-3.1.7
-      - llvm-4.0-dev
       - libblas-dev
       - liblapack-dev
 
 matrix:
   include:
-    # - env: GHC=7.8.4 CABAL=1.18 LLVM=4.0.0 CUDA=8.0.61-1
-    #   compiler: "GHC 7.8"
-    #   addons:
-    #     apt:
-    #       sources: *apt_sources
-    #       packages:
-    #         - *apt_packages
-    #         - cabal-install-1.18
-
     - env: GHC=7.10.3 CABAL=1.22 LLVM=4.0.0 CUDA=8.0.61-1
       compiler: "GHC 7.10"
       addons:
@@ -58,6 +41,7 @@ matrix:
           packages:
             - *apt_packages
             - cabal-install-1.22
+            - llvm-4.0-dev
 
     - env: GHC=8.0.2 CABAL=1.24 LLVM=4.0.0 CUDA=8.0.61-1
       compiler: "GHC 8.0"
@@ -67,8 +51,9 @@ matrix:
           packages:
             - *apt_packages
             - cabal-install-1.24
+            - llvm-4.0-dev
 
-    - env: GHC=8.2.1 CABAL=2.0 LLVM=4.0.0 CUDA=8.0.61-1
+    - env: GHC=8.2.2 CABAL=2.0 LLVM=5.0.0 CUDA=8.0.61-1
       compiler: "GHC 8.2"
       addons:
         apt:
@@ -76,6 +61,17 @@ matrix:
           packages:
             - *apt_packages
             - cabal-install-2.0
+            - llvm-5.0-dev
+
+    - env: GHC=8.4.1 CABAL=2.0 LLVM=6.0.0 CUDA=8.0.61-1
+      compiler: "GHC 8.4"
+      addons:
+        apt:
+          sources: *apt_sources
+          packages:
+            - *apt_packages
+            - cabal-install-2.0
+            - llvm-6.0-dev
 
     # - env: GHC=head CABAL=head LLVM=3.9.1
     #   compiler: "GHC HEAD"
@@ -101,28 +97,29 @@ before_install:
   - source .travis/update-ghc-settings.sh
   - travis_retry stack install c2hs --fast --no-terminal
 
+  # ghc bug? error while loading shared libraries: libffi.so.7
+  - |
+      case ${GHC} in
+        8.4.1) export LD_LIBRARY_PATH=$(stack path --compiler-bin)/../lib/ghc-8.4.1/rts:$LD_LIBRARY_PATH ;;
+      esac
+
 install:
-  - echo "$(ghc --version) [$(ghc --print-project-git-commit-id 2> /dev/null || echo '?')]"
+  - echo "$(stack exec ghc -- --version) [$(stack exec ghc -- --print-project-git-commit-id 2> /dev/null || echo '?')]"
   - cabal --version
   - stack --version
   - c2hs --version
-  - llc --version; true
-  - opt --version; true
-  - |
-      if [ ${GHC} == head -o ! -e stack.yaml ]; then
-        travis_retry cabal install --only-dependencies
-      else
-        travis_retry stack build --only-dependencies --fast --no-terminal --no-haddock-deps
-      fi
+  - llc-${LLVM:0:3} --version; true
+  - opt-${LLVM:0:3} --version; true
+
+  # how much do we have to do?
+  - stack build --no-terminal --dry-run
+
+  # build dependencies
+  - travis_retry travis_wait 60 stack build --only-dependencies --fast --jobs=2 --no-terminal
 
 script:
-  - |
-      if [ ${GHC} == head -o ! -e stack.yaml ]; then
-        travis_retry cabal install
-        travis_retry cabal haddock
-      else
-        travis_retry stack build --fast --no-terminal --haddock --no-haddock-deps
-      fi
+  - stack build --fast --jobs=2 --no-terminal --haddock --no-haddock-deps
+  - stack test accelerate-blas:test-llvm-native --test-arguments='--hedgehog-tests 50'
 
 after_success:
   - source .travis/update-accelerate-buildbot.sh
