@@ -29,6 +29,7 @@ encodeTranspose T = C.Trans
 encodeTranspose H = C.ConjTrans
 
 
+{-# INLINE withArray #-}
 withArray
     :: forall sh e b. Numeric e
     => Array sh e
@@ -36,6 +37,7 @@ withArray
     -> IO b
 withArray (Array _ adata) = withArrayData (numericR::NumericR e) adata
 
+{-# INLINE withArrayData #-}
 withArrayData
     :: NumericR e
     -> ArrayData (EltRepr e)

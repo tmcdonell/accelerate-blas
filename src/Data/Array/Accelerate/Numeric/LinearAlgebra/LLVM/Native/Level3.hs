@@ -52,8 +52,9 @@ gemm opA opB = ForeignAcc "native.gemm" gemm'
           opB'    = encodeTranspose opB
           alpha'  = indexArray alpha Z
       --
-      matC  <- allocateRemote (Z :. m :. n) :: LLVM Native (Matrix e)
-      ()    <- liftIO $ do
+      future  <- new
+      matC    <- allocateRemote (Z :. m :. n)
+      ()      <- liftIO $ do
         withArray matA   $ \ptr_A -> do
          withArray matB  $ \ptr_B -> do
           withArray matC $ \ptr_C -> do
@@ -63,5 +64,6 @@ gemm opA opB = ForeignAcc "native.gemm" gemm'
               NumericRcomplex32 -> C.cgemm C.RowMajor opA' opB' m n k alpha' (castPtr ptr_A) lda (castPtr ptr_B) ldb 0 (castPtr ptr_C) n
               NumericRcomplex64 -> C.zgemm C.RowMajor opA' opB' m n k alpha' (castPtr ptr_A) lda (castPtr ptr_B) ldb 0 (castPtr ptr_C) n
       --
-      return matC
+      put future matC
+      return future
 

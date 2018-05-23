@@ -38,6 +38,7 @@ encodeTranspose T = C.T
 encodeTranspose H = C.C
 
 
+{-# INLINE withArray #-}
 withArray
     :: forall sh e b. Numeric e
     => Array sh e
@@ -46,6 +47,7 @@ withArray
     -> LLVM PTX b
 withArray (Array _ adata) s k = withArrayData (numericR::NumericR e) adata s k
 
+{-# INLINE withArrayData #-}
 withArrayData
     :: NumericR e
     -> ArrayData (EltRepr e)
@@ -55,25 +57,25 @@ withArrayData
 withArrayData NumericRfloat32 ad s k =
   withDevicePtr ad $ \p -> do
     r <- k p
-    e <- checkpoint s
+    e <- waypoint s
     return (Just e,r)
 withArrayData NumericRfloat64 ad s k =
   withDevicePtr ad $ \p -> do
     r <- k p
-    e <- checkpoint s
+    e <- waypoint s
     return (Just e, r)
 withArrayData NumericRcomplex32 (AD_V2 ad) s k =
   withDevicePtr ad $ \p -> do
     r <- k p
-    e <- checkpoint s
+    e <- waypoint s
     return (Just e,r)
 withArrayData NumericRcomplex64 (AD_V2 ad) s k =
   withDevicePtr ad $ \p -> do
     r <- k p
-    e <- checkpoint s
+    e <- waypoint s
     return (Just e, r)
 
-
+{-# INLINE withLifetime' #-}
 withLifetime' :: Lifetime a -> (a -> LLVM PTX b) -> LLVM PTX b
 withLifetime' l k = do
   r <- k (unsafeGetValue l)

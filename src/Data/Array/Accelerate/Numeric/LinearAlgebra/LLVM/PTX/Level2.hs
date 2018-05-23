@@ -25,6 +25,8 @@ import Foreign.Marshal                                              ( with )
 import qualified Foreign.CUDA.Ptr                                   as CUDA
 import qualified Foreign.CUDA.BLAS                                  as BLAS
 
+import Control.Monad.Reader
+
 
 -- NOTE: cuBLAS requires matrices to be stored in column-major order
 -- (Fortran-style), but Accelerate uses C-style arrays in row-major order.
@@ -42,9 +44,8 @@ gemv opA = ForeignAcc "ptx.gemv" (gemv' numericR opA)
 gemv' :: Numeric e
       => NumericR e
       -> Transpose
-      -> Stream
       -> (Scalar e, Matrix e, Vector e)
-      -> LLVM PTX (Vector e)
+      -> Par PTX (Future (Vector e))
 gemv' NumericRcomplex32 H = as_gemm H
 gemv' NumericRcomplex64 H = as_gemm H
 gemv' _                 t = as_gemv t
@@ -53,22 +54,23 @@ gemv' _                 t = as_gemv t
 as_gemm
     :: Numeric e
     => Transpose
-    -> Stream
     -> (Scalar e, Matrix e, Vector e)
-    -> LLVM PTX (Vector e)
-as_gemm opA stream (alpha, matA, Array sh adata) = do
+    -> Par PTX (Future (Vector e))
+as_gemm opA (alpha, matA, Array sh adata) = do
   let matB = Array (sh,1) adata
   --
-  Array (sh',1) vecy <- gemm' opA N stream (alpha, matA, matB)
-  return (Array sh' vecy)
+  future <- new
+  result <- gemm' opA N (alpha, matA, matB)
+  fork $ do Array (sh',1) vecy <- get result
+            put future (Array sh' vecy)
+  return future
 
 as_gemv
     :: forall e. Numeric e
     => Transpose
-    -> Stream
     -> (Scalar e, Matrix e, Vector e)
-    -> LLVM PTX (Vector e)
-as_gemv opA stream (alpha, matA, vecx) = do
+    -> Par PTX (Future (Vector e))
+as_gemv opA (alpha, matA, vecx) = do
   let
       Z :. rowsA :. colsA = arrayShape matA
 
@@ -81,9 +83,11 @@ as_gemv opA stream (alpha, matA, vecx) = do
                   N -> T
                   _ -> N
   --
-  vecy    <- allocateRemote (Z :. sizeY) :: LLVM PTX (Vector e)
+  future  <- new
+  stream  <- ask
+  vecy    <- allocateRemote (Z :. sizeY)
   alpha'  <- indexRemote alpha 0
-  ()      <- do
+  ()      <- liftPar $ do
     withArray matA stream   $ \ptr_A -> do
      withArray vecx stream  $ \ptr_x -> do
       withArray vecy stream $ \ptr_y -> do
@@ -109,5 +113,6 @@ as_gemv opA stream (alpha, matA, vecx) = do
              with 0     $ \ptr_beta  ->
                BLAS.zgemv hdl opA' colsA rowsA ptr_alpha (CUDA.castDevPtr ptr_A) colsA (CUDA.castDevPtr ptr_x) 1 ptr_beta (CUDA.castDevPtr ptr_y)  1
   --
-  return vecy
+  put future vecy
+  return future
 

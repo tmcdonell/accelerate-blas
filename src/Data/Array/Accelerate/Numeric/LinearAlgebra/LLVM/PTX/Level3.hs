@@ -23,6 +23,8 @@ import Foreign.Marshal                                              ( with )
 import qualified Foreign.CUDA.Ptr                                   as CUDA
 import qualified Foreign.CUDA.BLAS                                  as BLAS
 
+import Control.Monad.Reader
+
 
 -- NOTE: cuBLAS requires that matrices are stored in column-major order
 -- (Fortran-style), but Accelerate uses a C-style convention where matrices are
@@ -41,10 +43,9 @@ gemm'
     :: forall e. Numeric e
     => Transpose
     -> Transpose
-    -> Stream
     -> (Scalar e, Matrix e, Matrix e)
-    -> LLVM PTX (Matrix e)
-gemm' opA opB stream (alpha, matA, matB) = do
+    -> Par PTX (Future (Matrix e))
+gemm' opA opB (alpha, matA, matB) = do
   let
       Z :. rowsA :. colsA = arrayShape matA
       Z :. rowsB :. colsB = arrayShape matB
@@ -62,32 +63,36 @@ gemm' opA opB stream (alpha, matA, matB) = do
       opA'    = encodeTranspose opA
       opB'    = encodeTranspose opB
   --
-  matC   <- allocateRemote (Z :. m :. n) :: LLVM PTX (Matrix e)
+  future <- new
+  stream <- ask
+  matC   <- allocateRemote (Z :. m :. n)
   alpha' <- indexRemote alpha 0
-  ()     <- withArray matA stream   $ \ptr_A -> do
-             withArray matB stream  $ \ptr_B -> do
-              withArray matC stream $ \ptr_C -> do
-                withBLAS            $ \hdl   -> do
-                  case numericR :: NumericR e of
-                    NumericRfloat32 -> liftIO $
-                      with alpha' $ \ptr_alpha ->
-                       with 0     $ \ptr_beta  ->
-                        BLAS.sgemm hdl opB' opA' n m k ptr_alpha ptr_B ldb ptr_A lda ptr_beta ptr_C n
+  ()     <- liftPar $
+    withArray matA stream   $ \ptr_A -> do
+     withArray matB stream  $ \ptr_B -> do
+      withArray matC stream $ \ptr_C -> do
+        withBLAS            $ \hdl   -> do
+          case numericR :: NumericR e of
+            NumericRfloat32 -> liftIO $
+              with alpha' $ \ptr_alpha ->
+               with 0     $ \ptr_beta  ->
+                BLAS.sgemm hdl opB' opA' n m k ptr_alpha ptr_B ldb ptr_A lda ptr_beta ptr_C n
 
-                    NumericRfloat64 -> liftIO $
-                      with alpha' $ \ptr_alpha ->
-                       with 0     $ \ptr_beta  ->
-                        BLAS.dgemm hdl opB' opA' n m k ptr_alpha ptr_B ldb ptr_A lda ptr_beta ptr_C n
+            NumericRfloat64 -> liftIO $
+              with alpha' $ \ptr_alpha ->
+               with 0     $ \ptr_beta  ->
+                BLAS.dgemm hdl opB' opA' n m k ptr_alpha ptr_B ldb ptr_A lda ptr_beta ptr_C n
 
-                    NumericRcomplex32 -> liftIO $
-                      with alpha' $ \ptr_alpha ->
-                       with 0     $ \ptr_beta  ->
-                        BLAS.cgemm hdl opB' opA' n m k ptr_alpha (CUDA.castDevPtr ptr_B) ldb (CUDA.castDevPtr ptr_A) lda ptr_beta (CUDA.castDevPtr ptr_C) n
+            NumericRcomplex32 -> liftIO $
+              with alpha' $ \ptr_alpha ->
+               with 0     $ \ptr_beta  ->
+                BLAS.cgemm hdl opB' opA' n m k ptr_alpha (CUDA.castDevPtr ptr_B) ldb (CUDA.castDevPtr ptr_A) lda ptr_beta (CUDA.castDevPtr ptr_C) n
 
-                    NumericRcomplex64 -> liftIO $
-                      with alpha' $ \ptr_alpha ->
-                       with 0     $ \ptr_beta  ->
-                        BLAS.zgemm hdl opB' opA' n m k ptr_alpha (CUDA.castDevPtr ptr_B) ldb (CUDA.castDevPtr ptr_A) lda ptr_beta (CUDA.castDevPtr ptr_C) n
-
-  return matC
+            NumericRcomplex64 -> liftIO $
+              with alpha' $ \ptr_alpha ->
+               with 0     $ \ptr_beta  ->
+                BLAS.zgemm hdl opB' opA' n m k ptr_alpha (CUDA.castDevPtr ptr_B) ldb (CUDA.castDevPtr ptr_A) lda ptr_beta (CUDA.castDevPtr ptr_C) n
+  --
+  put future matC
+  return future
 

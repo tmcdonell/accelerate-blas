@@ -39,8 +39,9 @@ gemv opA = ForeignAcc "native.gemv" gemv'
           opA'    = encodeTranspose opA
           alpha'  = indexArray alpha Z
       --
-      vecy  <- allocateRemote (Z :. sizeY) :: LLVM Native (Vector e)
-      ()    <- liftIO $ do
+      future  <- new
+      vecy    <- allocateRemote (Z :. sizeY)
+      ()      <- liftIO $ do
         withArray matA   $ \ptr_A -> do
          withArray vecx  $ \ptr_x -> do
           withArray vecy $ \ptr_y -> do
@@ -49,6 +50,7 @@ gemv opA = ForeignAcc "native.gemv" gemv'
               NumericRfloat64   -> C.dgemv C.RowMajor opA' rowsA colsA alpha' ptr_A colsA ptr_x 1 0 ptr_y 1
               NumericRcomplex32 -> C.cgemv C.RowMajor opA' rowsA colsA alpha' (castPtr ptr_A) colsA (castPtr ptr_x) 1 0 (castPtr ptr_y) 1
               NumericRcomplex64 -> C.zgemv C.RowMajor opA' rowsA colsA alpha' (castPtr ptr_A) colsA (castPtr ptr_x) 1 0 (castPtr ptr_y) 1
-        --
-      return vecy
+      --
+      put future vecy
+      return future
 

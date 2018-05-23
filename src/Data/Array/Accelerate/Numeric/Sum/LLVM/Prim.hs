@@ -21,19 +21,19 @@ module Data.Array.Accelerate.Numeric.Sum.LLVM.Prim (
 import Data.Array.Accelerate.Type
 import Data.Array.Accelerate.Error
 
-import Data.Array.Accelerate.LLVM.CodeGen.Downcast                  ( downcast )
 import Data.Array.Accelerate.LLVM.CodeGen.IR                        ( IR(..), Operands(..), IROP(..) )
 import Data.Array.Accelerate.LLVM.CodeGen.Monad                     ( CodeGen, freshName, instr_ )
 import Data.Array.Accelerate.LLVM.CodeGen.Sugar                     ( IROpenFun1(..) )
+import LLVM.AST.Type.Downcast                                       ( downcast )
 import qualified Data.Array.Accelerate.LLVM.CodeGen.Arithmetic      as A
 import qualified LLVM.AST.Type.Name                                 as A
 import qualified LLVM.AST.Type.Operand                              as A
 import qualified LLVM.AST.Type.Representation                       as A
 
 import LLVM.AST.Instruction
-import LLVM.AST.Name
-import LLVM.AST.Operand
-import LLVM.AST.Type
+import LLVM.AST.Name                                                ( Name(..) )
+import LLVM.AST.Operand                                             ( Operand(..) )
+import LLVM.AST.Type                                                ( Type(..), FloatingPointType(..) )
 
 
 -- | As (+), but don't allow potentially unsafe floating-point optimisations.
