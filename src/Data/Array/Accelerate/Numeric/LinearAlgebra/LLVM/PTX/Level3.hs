@@ -64,7 +64,7 @@ gemm' opA opB (alpha, matA, matB) = do
       opB'    = encodeTranspose opB
   --
   future <- new
-  stream <- ask
+  stream <- asks ptxStream
   matC   <- allocateRemote (Z :. m :. n)
   alpha' <- indexRemote alpha 0
   ()     <- liftPar $

@@ -51,7 +51,11 @@ fsub t = IRFun1 $ A.uncurry (binop FSub t)
 fmul :: FloatingType a -> IROpenFun1 arch env aenv ((a,a) -> a)
 fmul t = IRFun1 $ A.uncurry (binop FMul t)
 
-binop :: (FastMathFlags -> Operand -> Operand -> InstructionMetadata -> Instruction) -> FloatingType a -> IR a -> IR a -> CodeGen (IR a)
+binop :: (FastMathFlags -> Operand -> Operand -> InstructionMetadata -> Instruction)
+      -> FloatingType a
+      -> IR a
+      -> IR a
+      -> CodeGen arch (IR a)
 binop f t (op t -> x) (op t -> y) = do
   r <- instr (downcast t) (f fmf (downcast x) (downcast y) md)
   return (upcast t r)
@@ -70,10 +74,10 @@ fmf = noFastMathFlags
 fmf = NoFastMathFlags
 #endif
 
-fresh :: CodeGen Name
+fresh :: CodeGen arch Name
 fresh = downcast <$> freshName
 
-instr :: Type -> Instruction -> CodeGen Operand
+instr :: Type -> Instruction -> CodeGen arch Operand
 instr ty ins = do
   name <- fresh
   instr_ (name := ins)

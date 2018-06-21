@@ -84,7 +84,7 @@ as_gemv opA (alpha, matA, vecx) = do
                   _ -> N
   --
   future  <- new
-  stream  <- ask
+  stream  <- asks ptxStream
   vecy    <- allocateRemote (Z :. sizeY)
   alpha'  <- indexRemote alpha 0
   ()      <- liftPar $ do
