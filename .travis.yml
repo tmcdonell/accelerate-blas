@@ -26,6 +26,7 @@ addons:
       - sourceline: "deb http://deb.debian.org/debian experimental main"
 
     packages: &apt_packages
+      - dpkg
       - g++-4.8
       - libgmp-dev
       - happy-1.19.5
