@@ -84,9 +84,8 @@ instr ty ins = do
   return (LocalReference ty name)
 
 upcast :: FloatingType t -> Operand -> IR t
+-- upcast TypeHalf{}    (LocalReference (FloatingPointType HalfFP)   (UnName x)) = IR $ OP_Half    (A.LocalReference A.type' (A.UnName x))
 upcast TypeFloat{}   (LocalReference (FloatingPointType FloatFP)  (UnName x)) = IR $ OP_Float   (A.LocalReference A.type' (A.UnName x))
 upcast TypeDouble{}  (LocalReference (FloatingPointType DoubleFP) (UnName x)) = IR $ OP_Double  (A.LocalReference A.type' (A.UnName x))
-upcast TypeCFloat{}  (LocalReference (FloatingPointType FloatFP)  (UnName x)) = IR $ OP_CFloat  (A.LocalReference A.type' (A.UnName x))
-upcast TypeCDouble{} (LocalReference (FloatingPointType DoubleFP) (UnName x)) = IR $ OP_CDouble (A.LocalReference A.type' (A.UnName x))
 upcast _ _ = $internalError "upcast" "expected local reference"
 

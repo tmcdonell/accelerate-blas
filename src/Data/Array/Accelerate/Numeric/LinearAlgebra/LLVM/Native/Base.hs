@@ -43,8 +43,8 @@ withArrayData
     -> ArrayData (EltRepr e)
     -> (ArrayPtrs (EltRepr e) -> IO b)
     -> IO b
-withArrayData NumericRfloat32   (AD_Float  ua)         f = withUniqueArrayPtr ua f
-withArrayData NumericRfloat64   (AD_Double ua)         f = withUniqueArrayPtr ua f
-withArrayData NumericRcomplex32 (AD_V2 (AD_Float  ua)) f = withUniqueArrayPtr ua f
-withArrayData NumericRcomplex64 (AD_V2 (AD_Double ua)) f = withUniqueArrayPtr ua f
+withArrayData NumericRfloat32   (AD_Float  ua)            f = withUniqueArrayPtr ua f
+withArrayData NumericRfloat64   (AD_Double ua)            f = withUniqueArrayPtr ua f
+withArrayData NumericRcomplex32 (AD_Vec _ (AD_Float  ua)) f = withUniqueArrayPtr ua f
+withArrayData NumericRcomplex64 (AD_Vec _ (AD_Double ua)) f = withUniqueArrayPtr ua f
 

@@ -61,7 +61,7 @@ as_gemm opA (alpha, matA, Array sh adata) = do
   --
   future <- new
   result <- gemm' opA N (alpha, matA, matB)
-  fork $ do Array (sh',1) vecy <- get result
+  fork $ do Array (sh',_) vecy <- get result
             put future (Array sh' vecy)
   return future
 

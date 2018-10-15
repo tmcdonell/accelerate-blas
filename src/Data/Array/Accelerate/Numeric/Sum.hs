@@ -1,12 +1,16 @@
 {-# LANGUAGE ConstraintKinds       #-}
+{-# LANGUAGE DeriveAnyClass        #-}
 {-# LANGUAGE DeriveDataTypeable    #-}
+{-# LANGUAGE DeriveGeneric         #-}
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RebindableSyntax      #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
+{-# LANGUAGE StandaloneDeriving    #-}
 {-# LANGUAGE TypeFamilies          #-}
 {-# LANGUAGE TypeOperators         #-}
+{-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE ViewPatterns          #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.Sum
@@ -56,14 +60,12 @@ module Data.Array.Accelerate.Numeric.Sum (
 ) where
 
 import Data.Array.Accelerate                                        as A hiding ( sum, fromInteger )
-import Data.Array.Accelerate.Type                                   as A
 import Data.Array.Accelerate.Smart                                  as A ( Exp(..), PreExp(..) )
 import Data.Array.Accelerate.Product                                as A
 import Data.Array.Accelerate.Array.Sugar                            as A
 import Data.Array.Accelerate.Numeric.Sum.Arithmetic                 as A
 
 import Data.Proxy
-import Data.Typeable
 import Prelude                                                      ( Show, fromInteger )
 
 
@@ -103,7 +105,7 @@ class (Elt a, Elt (s a)) => Summation s a where
 -- costly than plain Kahan summation, but is /always/ at least as accurate.
 --
 data KBN a = KBN a a
-  deriving (Show, Typeable)
+  deriving (Show, Generic, Elt, IsProduct Elt)
 
 -- | Return the result of a Kahan-Babuška-Neumaier sum.
 --
@@ -136,32 +138,6 @@ instance Summation KBN Double where
   into _ x  = lift (KBN x 0)
   from _ x  = let KBN s c = unlift x in s + c
 
-instance Summation KBN CFloat where
-  zero      = constant (KBN 0 0)
-  add       = kbnAdd
-  into _ x  = lift (KBN x 0)
-  from _ x  = let KBN s c = unlift x in s + c
-
-instance Summation KBN CDouble where
-  zero      = constant (KBN 0 0)
-  add       = kbnAdd
-  into _ x  = lift (KBN x 0)
-  from _ x  = let KBN s c = unlift x in s + c
-
-type instance EltRepr (KBN a) = (((), EltRepr a), EltRepr a)
-
-instance Elt a => Elt (KBN a) where
-  eltType _ = TypeRunit `TypeRpair` eltType (undefined::a)
-                        `TypeRpair` eltType (undefined::a)
-  toElt (((),a),b)  = KBN (toElt a) (toElt b)
-  fromElt (KBN a b) = (((), fromElt a), fromElt b)
-
-instance Elt a => IsProduct Elt (KBN a) where
-  type ProdRepr (KBN a) = (((), a), a)
-  toProd _ (((),a),b)  = KBN a b
-  fromProd _ (KBN a b) = (((),a),b)
-  prod _ _             = ProdRsnoc $ ProdRsnoc ProdRunit
-
 instance (Lift Exp a, Elt (Plain a)) => Lift Exp (KBN a) where
   type Plain (KBN a) = KBN (Plain a)
   lift (KBN a b)     = Exp $ Tuple $ NilTup `SnocTup` lift a
@@ -180,7 +156,7 @@ instance Elt a => Unlift Exp (KBN (Exp a)) where
 -- compensation term, hence the use of \"second order\" in the name.
 --
 data KB2 a = KB2 a a a
-  deriving (Show, Typeable)
+  deriving (Show, Generic, Elt, IsProduct Elt)
 
 -- | Return the result of a second-order Kahan-Babuška sum.
 --
@@ -218,33 +194,6 @@ instance Summation KB2 Double where
   into _ x  = lift (KB2 x 0 0)
   from _ x  = let KB2 s c cc = unlift x in s + c + cc
 
-instance Summation KB2 CFloat where
-  zero      = constant (KB2 0 0 0)
-  add       = kb2Add
-  into _ x  = lift (KB2 x 0 0)
-  from _ x  = let KB2 s c cc = unlift x in s + c + cc
-
-instance Summation KB2 CDouble where
-  zero      = constant (KB2 0 0 0)
-  add       = kb2Add
-  into _ x  = lift (KB2 x 0 0)
-  from _ x  = let KB2 s c cc = unlift x in s + c + cc
-
-type instance EltRepr (KB2 a) = ((((), EltRepr a), EltRepr a), EltRepr a)
-
-instance Elt a => Elt (KB2 a) where
-  eltType _ = TypeRunit `TypeRpair` eltType (undefined::a)
-                        `TypeRpair` eltType (undefined::a)
-                        `TypeRpair` eltType (undefined::a)
-  toElt ((((),a),b),c) = KB2 (toElt a) (toElt b) (toElt c)
-  fromElt (KB2 a b c)  = ((((), fromElt a), fromElt b), fromElt c)
-
-instance Elt a => IsProduct Elt (KB2 a) where
-  type ProdRepr (KB2 a)   = ((((), a), a), a)
-  toProd _ ((((),a),b),c) = KB2 a b c
-  fromProd _ (KB2 a b c)  = ((((),a),b),c)
-  prod _ _                = ProdRsnoc $ ProdRsnoc $ ProdRsnoc ProdRunit
-
 instance (Lift Exp a, Elt (Plain a)) => Lift Exp (KB2 a) where
   type Plain (KB2 a) = KB2 (Plain a)
   lift (KB2 a b c)   = Exp $ Tuple $ NilTup `SnocTup` lift a
@@ -261,7 +210,7 @@ instance Elt a => Unlift Exp (KB2 (Exp a)) where
 -- methods. This summation method is included only for completeness.
 --
 data Kahan a = Kahan a a
-  deriving (Show, Typeable)
+  deriving (Show, Generic, Elt, IsProduct Elt)
 
 -- | Return the result of a Kahan sum.
 --
@@ -292,32 +241,6 @@ instance Summation Kahan Double where
   add       = kahanAdd
   into _ x  = lift (Kahan x 0)
   from _ x  = let Kahan s _ = unlift x in s
-
-instance Summation Kahan CFloat where
-  zero      = constant (Kahan 0 0)
-  add       = kahanAdd
-  into _ x  = lift (Kahan x 0)
-  from _ x  = let Kahan s _ = unlift x in s
-
-instance Summation Kahan CDouble where
-  zero      = constant (Kahan 0 0)
-  add       = kahanAdd
-  into _ x  = lift (Kahan x 0)
-  from _ x  = let Kahan s _ = unlift x in s
-
-type instance EltRepr (Kahan a) = (((), EltRepr a), EltRepr a)
-
-instance Elt a => Elt (Kahan a) where
-  eltType _ = TypeRunit `TypeRpair` eltType (undefined::a)
-                        `TypeRpair` eltType (undefined::a)
-  toElt (((),a),b)    = Kahan (toElt a) (toElt b)
-  fromElt (Kahan a b) = (((), fromElt a), fromElt b)
-
-instance Elt a => IsProduct Elt (Kahan a) where
-  type ProdRepr (Kahan a) = (((), a), a)
-  toProd _ (((),a),b)     = Kahan a b
-  fromProd _ (Kahan a b)  = (((),a),b)
-  prod _ _                = ProdRsnoc $ ProdRsnoc ProdRunit
 
 instance (Lift Exp a, Elt (Plain a)) => Lift Exp (Kahan a) where
   type Plain (Kahan a) = Kahan (Plain a)

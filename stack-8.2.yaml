@@ -8,16 +8,18 @@ packages:
 
 extra-deps:
 - git:    https://github.com/tmcdonell/accelerate.git
-  commit: 388513912b43adaf36835954c59bbecd0359f343
+  commit: 4e6a24f771ade0c577b738ca0eadb6f483a6682f
 
 - git:    https://github.com/tmcdonell/accelerate-llvm.git
-  commit: e802c05f75004e8df27ac1fe955f15370c907114
+  commit: 3e6de77da9dd5d3dc6969ad8251b94da557e5479
   subdirs:
-    - 'accelerate-llvm'
-    - 'accelerate-llvm-native'
-    - 'accelerate-llvm-ptx'
+    - accelerate-llvm
+    - accelerate-llvm-native
+    - accelerate-llvm-ptx
 
-- 'half-0.3'
+- half-0.3
+- nvvm-0.9.0.0
+- primitive-0.6.4.0
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

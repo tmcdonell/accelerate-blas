@@ -64,12 +64,12 @@ withArrayData NumericRfloat64 ad s k =
     r <- k p
     e <- waypoint s
     return (Just e, r)
-withArrayData NumericRcomplex32 (AD_V2 ad) s k =
+withArrayData NumericRcomplex32 (AD_Vec _ ad) s k =
   withDevicePtr ad $ \p -> do
     r <- k p
     e <- waypoint s
     return (Just e,r)
-withArrayData NumericRcomplex64 (AD_V2 ad) s k =
+withArrayData NumericRcomplex64 (AD_Vec _ ad) s k =
   withDevicePtr ad $ \p -> do
     r <- k p
     e <- waypoint s
