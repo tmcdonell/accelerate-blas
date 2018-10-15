@@ -8,6 +8,7 @@ cache:
   timeout: 600
   directories:
     - $HOME/.stack/snapshots
+    - $HOME/.local/bin
     - .stack-work/install
 
 before_cache:
@@ -19,9 +20,10 @@ addons:
       - hvr-ghc
       - ubuntu-toolchain-r-test
       - llvm-toolchain-trusty
-      - llvm-toolchain-trusty-4.0
-      - llvm-toolchain-trusty-5.0
       - llvm-toolchain-trusty-6.0
+      - llvm-toolchain-trusty-5.0
+      - llvm-toolchain-trusty-4.0
+      - sourceline: "deb http://deb.debian.org/debian experimental main"
 
     packages: &apt_packages
       - g++-4.8
@@ -33,34 +35,40 @@ addons:
 
 matrix:
   include:
-    - env: GHC=8.4.2 CABAL=2.0 LLVM=6.0.0 CUDA=8.0.61-1
+    - env: GHC=8.6.1 LLVM=6.0.0 CUDA=10.0.130-1
+      compiler: "GHC 8.6"
+      addons:
+        apt:
+          sources: *apt_sources
+          packages:
+            - *apt_packages
+            - llvm-6.0-dev
+
+    - env: GHC=8.4.2 LLVM=6.0.0 CUDA=8.0.61-1
       compiler: "GHC 8.4"
       addons:
         apt:
           sources: *apt_sources
           packages:
             - *apt_packages
-            - cabal-install-2.0
             - llvm-6.0-dev
 
-    - env: GHC=8.2.2 CABAL=2.0 LLVM=5.0.0 CUDA=8.0.61-1
+    - env: GHC=8.2.2 LLVM=5.0.0 CUDA=8.0.61-1
       compiler: "GHC 8.2"
       addons:
         apt:
           sources: *apt_sources
           packages:
             - *apt_packages
-            - cabal-install-2.0
             - llvm-5.0-dev
 
-    - env: GHC=8.0.2 CABAL=1.24 LLVM=4.0.0 CUDA=8.0.61-1
+    - env: GHC=8.0.2 LLVM=4.0.0 CUDA=8.0.61-1
       compiler: "GHC 8.0"
       addons:
         apt:
           sources: *apt_sources
           packages:
             - *apt_packages
-            - cabal-install-1.24
             - llvm-4.0-dev
 
     # - env: GHC=head CABAL=head LLVM=3.9.1
@@ -73,7 +81,7 @@ matrix:
   fast_finish: true
 
 before_install:
-  - export PATH=/opt/cabal/$CABAL/bin:/opt/alex/3.1.7/bin:/opt/happy/1.19.5/bin:$HOME/.cabal/bin:$PATH
+  - export PATH=/opt/alex/3.1.7/bin:/opt/happy/1.19.5/bin:$PATH
   # - |
   #     case ${GHC} in
   #       7.8.*) export UPGRADE_CABAL=1 ;;
@@ -95,7 +103,6 @@ before_install:
 
 install:
   - echo "$(stack exec ghc -- --version) [$(stack exec ghc -- --print-project-git-commit-id 2> /dev/null || echo '?')]"
-  - cabal --version
   - stack --version
   - c2hs --version
   - llc-${LLVM:0:3} --version; true

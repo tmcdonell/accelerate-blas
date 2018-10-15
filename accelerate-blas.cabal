@@ -46,7 +46,7 @@ library
     Data.Array.Accelerate.Numeric.Sum.LLVM.PTX
 
   build-depends:
-        base                            >= 4.7 && < 4.12
+        base                            >= 4.7 && < 4.13
       , accelerate                      >= 1.0 && < 1.4
 
   hs-source-dirs:
@@ -102,7 +102,7 @@ test-suite test-llvm-native
     buildable: False
 
   build-depends:
-        base                    >= 4.7  && < 4.12
+        base                    >= 4.7  && < 4.13
       , accelerate              >= 1.2
       , accelerate-blas
       , accelerate-llvm-native
@@ -132,7 +132,7 @@ test-suite test-llvm-ptx
     buildable: False
 
   build-depends:
-        base                    >= 4.7  && < 4.12
+        base                    >= 4.7  && < 4.13
       , accelerate              >= 1.2
       , accelerate-blas
       , accelerate-llvm-ptx
@@ -164,7 +164,7 @@ benchmark bench-hmatrix
     buildable: False
 
   build-depends:
-        base                            >= 4.7 && < 4.12
+        base                            >= 4.7 && < 4.13
       , criterion                       >= 1.0
       , mwc-random                      >= 0.8
       , deepseq                         >= 1.0
@@ -192,7 +192,7 @@ benchmark bench-llvm-native
     buildable: False
 
   build-depends:
-        base                            >= 4.7 && < 4.12
+        base                            >= 4.7 && < 4.13
       , accelerate
       , accelerate-blas
       , accelerate-llvm-native
@@ -221,7 +221,7 @@ benchmark bench-llvm-ptx
     buildable: False
 
   build-depends:
-        base                            >= 4.7 && < 4.12
+        base                            >= 4.7 && < 4.13
       , accelerate
       , accelerate-blas
       , accelerate-llvm-ptx
