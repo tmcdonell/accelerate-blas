@@ -32,7 +32,6 @@ addons:
       - alex-3.1.7
       - libblas-dev
       - liblapack-dev
-      - sourceline: "deb http://deb.debian.org/debian experimental main"
 
 matrix:
   include:
