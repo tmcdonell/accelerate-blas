@@ -32,6 +32,7 @@ addons:
       - alex-3.1.7
       - libblas-dev
       - liblapack-dev
+      - sourceline: "deb http://deb.debian.org/debian experimental main"
 
 matrix:
   include:
@@ -82,32 +83,27 @@ matrix:
 
 before_install:
   - export PATH=/opt/alex/3.1.7/bin:/opt/happy/1.19.5/bin:$PATH
-  # - |
-  #     case ${GHC} in
-  #       7.8.*) export UPGRADE_CABAL=1 ;;
-  #     esac
-  # - |
-  #     case ${LLVM} in
-  #       3.5.*) source .travis/install-llvm-trusty.sh ;;
-  #     esac
   - source .travis/install-cuda-trusty.sh
   - source .travis/install-stack.sh
   - source .travis/update-ghc-settings.sh
   - travis_retry stack install c2hs --fast --no-terminal
 
-  # ghc bug? error while loading shared libraries: libffi.so.7
-  - |
-      case ${GHC} in
-        8.4*) export LD_LIBRARY_PATH=$(stack path --compiler-bin)/../lib/ghc-${GHC}/rts:${LD_LIBRARY_PATH} ;;
-      esac
+  # GHC 8.4+ require libffi7
+  # - sudo apt-get install debian-archive-keyring
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 0x7638D0442B90D010
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 0x8B48AD6246925553
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 0x04EE7237B7D453EC
+  - sudo apt-get update
+  - sudo apt-get install -y libffi7
 
-install:
+  # build environment
   - echo "$(stack exec ghc -- --version) [$(stack exec ghc -- --print-project-git-commit-id 2> /dev/null || echo '?')]"
   - stack --version
   - c2hs --version
   - llc-${LLVM:0:3} --version; true
   - opt-${LLVM:0:3} --version; true
 
+install:
   # how much do we have to do?
   - stack build --no-terminal --dry-run
 
