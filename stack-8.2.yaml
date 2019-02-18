@@ -1,25 +1,25 @@
 # For more information, see: https://github.com/commercialhaskell/stack/blob/release/doc/yaml_configuration.md
 # vim: nospell
 
-resolver: lts-11.2
+resolver: lts-11.22
 
 packages:
 - '.'
 
 extra-deps:
 - git:    https://github.com/tmcdonell/accelerate.git
-  commit: 4e6a24f771ade0c577b738ca0eadb6f483a6682f
+  commit: d948d737683bc2f340b56319a4412505274502fc
 
 - git:    https://github.com/tmcdonell/accelerate-llvm.git
-  commit: 3e6de77da9dd5d3dc6969ad8251b94da557e5479
+  commit: a7a5c89a35f766dd14f6f2a982ea165bed0fcac1
   subdirs:
     - accelerate-llvm
     - accelerate-llvm-native
     - accelerate-llvm-ptx
 
+- cuda-0.10.0.0
 - half-0.3
 - nvvm-0.9.0.0
-- primitive-0.6.4.0
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

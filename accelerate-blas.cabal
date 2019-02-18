@@ -62,7 +62,7 @@ library
         accelerate-llvm                 >= 1.3 && < 1.4
       , accelerate-llvm-native          >= 1.3 && < 1.4
       , blas-hs                         >= 0.1
-      , llvm-hs-pure                    >= 4.1 && < 6.3
+      , llvm-hs-pure                    >= 4.1 && < 7.1
 
     other-modules:
       Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
@@ -80,7 +80,7 @@ library
       , cublas                          >= 0.3
       , cuda                            >= 0.8
       , file-embed                      >= 0.0.10
-      , llvm-hs-pure                    >= 4.1 && < 6.3
+      , llvm-hs-pure                    >= 4.1 && < 7.1
       , mtl                             >= 2.2
 
     other-modules:

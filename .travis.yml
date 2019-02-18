@@ -2,7 +2,6 @@
 #
 language: minimal
 dist: trusty
-sudo: required
 
 cache:
   timeout: 600
@@ -12,6 +11,7 @@ cache:
     - .stack-work/install
 
 before_cache:
+  # - rm -rf $(stack path --local-install-root)/bin
   - rm -rf $(stack path --local-install-root)/doc
 
 addons:
@@ -20,14 +20,10 @@ addons:
       - hvr-ghc
       - ubuntu-toolchain-r-test
       - llvm-toolchain-trusty
-      - llvm-toolchain-trusty-6.0
-      - llvm-toolchain-trusty-5.0
-      - llvm-toolchain-trusty-4.0
-      - sourceline: "deb http://deb.debian.org/debian experimental main"
-
     packages: &apt_packages
       - dpkg
-      - g++-4.8
+      - gcc-8
+      - g++-8
       - libgmp-dev
       - happy-1.19.5
       - alex-3.1.7
@@ -35,71 +31,70 @@ addons:
       - liblapack-dev
 
 matrix:
+  fast_finish: true
   include:
-    - env: GHC=8.6.1 LLVM=6.0.0 CUDA=10.0.130-1
+    - env: GHC=8.6.3 LLVM=7.0.1 CUDA=8.0.61-1
       compiler: "GHC 8.6"
       addons:
         apt:
-          sources: *apt_sources
+          sources:
+            - *apt_sources
+            - llvm-toolchain-trusty-7
           packages:
             - *apt_packages
-            - llvm-6.0-dev
+            - llvm-7-dev
 
-    - env: GHC=8.4.2 LLVM=6.0.0 CUDA=8.0.61-1
+    - env: GHC=8.4.3 LLVM=6.0.1 CUDA=8.0.61-1
       compiler: "GHC 8.4"
       addons:
         apt:
-          sources: *apt_sources
+          sources:
+            - *apt_sources
+            - llvm-toolchain-trusty-6.0
           packages:
             - *apt_packages
             - llvm-6.0-dev
 
-    - env: GHC=8.2.2 LLVM=5.0.0 CUDA=8.0.61-1
+    - env: GHC=8.2.2 LLVM=5.0.2 CUDA=8.0.61-1
       compiler: "GHC 8.2"
       addons:
         apt:
-          sources: *apt_sources
+          sources:
+            - *apt_sources
+            - llvm-toolchain-trusty-5.0
           packages:
             - *apt_packages
             - llvm-5.0-dev
 
-    - env: GHC=8.0.2 LLVM=4.0.0 CUDA=8.0.61-1
+    - env: GHC=8.0.2 LLVM=4.0.1 CUDA=8.0.61-1
       compiler: "GHC 8.0"
       addons:
         apt:
-          sources: *apt_sources
+          sources:
+            - *apt_sources
+            - llvm-toolchain-trusty-4.0
           packages:
             - *apt_packages
             - llvm-4.0-dev
-
-    # - env: GHC=head CABAL=head LLVM=3.9.1
-    #   compiler: "GHC HEAD"
-    #   addons: { apt: { sources: [ hvr-ghc, ubuntu-toolchain-r-test ], packages: [ nvidia-cuda-toolkit, g++-4.8, ghc-head, cabal-install-head, happy-1.19.5, alex-3.1.7 ] }}
-
-  # allow_failures:
-  #   - env: GHC=head CABAL=head LLVM=3.9.1
-
-  fast_finish: true
 
 before_install:
   - export PATH=/opt/alex/3.1.7/bin:/opt/happy/1.19.5/bin:$PATH
   - source .travis/install-cuda-trusty.sh
   - source .travis/install-stack.sh
-  - source .travis/update-ghc-settings.sh
-  - travis_retry stack install c2hs --fast --no-terminal
 
-  # GHC 8.4+ require libffi7
-  # - sudo apt-get install debian-archive-keyring
-  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 0x7638D0442B90D010
-  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 0x8B48AD6246925553
-  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 0x04EE7237B7D453EC
+  # llvm-hs requires new g++
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8
+
+  # ghc-8.4+ require libffi7
+  - echo "deb http://deb.debian.org/debian experimental main" | sudo tee -a /etc/apt/sources.list
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key 0x7638D0442B90D010 0x8B48AD6246925553 0x04EE7237B7D453EC
+  - sudo apt-get install debian-archive-keyring
   - sudo apt-get update
-  - sudo apt-get install -y libffi7
+  - sudo apt-get install libffi7
 
   # build environment
   - echo "$(stack exec ghc -- --version) [$(stack exec ghc -- --print-project-git-commit-id 2> /dev/null || echo '?')]"
   - stack --version
-  - c2hs --version
   - llc-${LLVM:0:3} --version; true
   - opt-${LLVM:0:3} --version; true
 
@@ -111,7 +106,7 @@ install:
   - travis_retry travis_wait 60 stack build --only-dependencies --fast --jobs=2 --no-terminal
 
 script:
-  - stack build --fast --jobs=2 --no-terminal --haddock --no-haddock-deps
+  - stack build --fast --jobs=2 --no-terminal --haddock --no-haddock-deps --test --no-run-tests
   - stack test accelerate-blas:test-llvm-native --test-arguments='--hedgehog-tests 50'
 
 after_success:
