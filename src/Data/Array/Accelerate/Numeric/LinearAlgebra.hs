@@ -29,7 +29,7 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra (
   (<>),
 
   -- * Diagonal
-  identity, diagonal,
+  identity, diagonal, trace,
 
 ) where
 
@@ -169,4 +169,11 @@ diagonal v =
       zeros = fill (index2 n n) 0
   in
   permute const zeros (\(unindex1 -> i) -> index2 i i) v
+
+-- | The sum of the diagonal elements of a (square) matrix
+--
+trace :: Num e => Acc (Matrix e) -> Acc (Scalar e)
+trace m =
+  let Z :. h :. w = unlift (shape m)
+  in  sum (backpermute (index1 (min h w)) (\(unindex1 -> i) -> index2 i i) m)
 
