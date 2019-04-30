@@ -59,7 +59,7 @@ as_gemm
 as_gemm opA stream (alpha, matA, Array sh adata) = do
   let matB = Array (sh,1) adata
   --
-  Array (sh',1) vecy <- gemm' opA N stream (alpha, matA, matB)
+  Array (sh',_) vecy <- gemm' opA N stream (alpha, matA, matB)
   return (Array sh' vecy)
 
 as_gemv
