@@ -18,6 +18,7 @@ module Data.Array.Accelerate.Numeric.Sum.Arithmetic (
 ) where
 
 import Data.Array.Accelerate
+import Data.Array.Accelerate.Type
 
 import qualified Data.Array.Accelerate.Numeric.Sum.LLVM.Native      as Native
 import qualified Data.Array.Accelerate.Numeric.Sum.LLVM.PTX         as PTX

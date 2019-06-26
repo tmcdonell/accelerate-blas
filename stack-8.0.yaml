@@ -7,11 +7,11 @@ packages:
 - '.'
 
 extra-deps:
-- git:    https://github.com/tmcdonell/accelerate.git
-  commit: d948d737683bc2f340b56319a4412505274502fc
+- github: tmcdonell/accelerate
+  commit: 27a13986d4fc87eaea853b8517475e19bd11fc94
 
-- git:    https://github.com/tmcdonell/accelerate-llvm.git
-  commit: a7a5c89a35f766dd14f6f2a982ea165bed0fcac1
+- github: tmcdonell/accelerate-llvm
+  commit: 5e2decb4a80bf4b60a4fa6018fc172d66764b7d2
   subdirs:
     - accelerate-llvm
     - accelerate-llvm-native
@@ -26,6 +26,7 @@ extra-deps:
 - lockfree-queue-0.2.3.1
 - mwc-random-accelerate-0.1.0.0
 - nvvm-0.9.0.0
+- prettyprinter-1.2.1
 - primitive-0.6.4.0
 - tasty-hedgehog-0.2.0.0
 
