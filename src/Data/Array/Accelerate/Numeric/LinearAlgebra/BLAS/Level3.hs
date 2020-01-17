@@ -28,7 +28,6 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level3 (
 ) where
 
 import Data.Array.Accelerate                                        as A
-import Data.Array.Accelerate.Smart                                  as A
 import Data.Array.Accelerate.Data.Complex                           as A
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 
@@ -70,7 +69,7 @@ gemm alpha opA matA opB matB = go (lift (unit alpha, matA, matB))
 #ifdef ACCELERATE_LLVM_PTX_BACKEND
       foreignAcc (PTX.gemm opA opB) $
 #endif
-      (\(unatup3 -> (_, arr, brr)) -> mXm arr brr)
+      (\(T3 _ arr brr) -> mXm arr brr)
 
     -- General dense matrix-matrix multiply written in pure Accelerate. This is
     -- not efficient due to the memory access patterns. We could probably

@@ -28,7 +28,6 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level2 (
 ) where
 
 import Data.Array.Accelerate                                        as A
-import Data.Array.Accelerate.Smart                                  as A
 import Data.Array.Accelerate.Data.Complex                           as A
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 
@@ -69,7 +68,7 @@ gemv alpha opA matA x = go (lift (unit alpha, matA, x))
 #ifdef ACCELERATE_LLVM_PTX_BACKEND
       foreignAcc (PTX.gemv opA) $
 #endif
-      (\(unatup3 -> (_, arr, brr)) -> mXv arr brr)
+      (\(T3 _ arr brr) -> mXv arr brr)
 
     -- General matrix-vector multiply in pure Accelerate. This is probably not
     -- efficient.
