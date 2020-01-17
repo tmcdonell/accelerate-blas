@@ -4,6 +4,7 @@
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE PatternSynonyms       #-}
 {-# LANGUAGE RebindableSyntax      #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE StandaloneDeriving    #-}
@@ -45,24 +46,21 @@ module Data.Array.Accelerate.Numeric.Sum (
   sum,
 
   -- * Kahan-Babuška-Neumaier summation
-  KBN(..),
+  KBN(..), pattern KBN_,
   kbn,
 
   -- * Order-2 Kahan-Babuška summation
-  KB2(..),
+  KB2(..), pattern KB2_,
   kb2,
 
   -- * Kahan summation
-  Kahan(..),
+  Kahan(..), pattern Kahan_,
   kahan,
 
 ) where
 
 import Data.Array.Accelerate                                        as A hiding ( sum, fromInteger )
-import Data.Array.Accelerate.Smart                                  as A ( Exp(..), PreExp(..) )
 import Data.Array.Accelerate.Type                                   as A
-import Data.Array.Accelerate.Product                                as A
-import Data.Array.Accelerate.Array.Sugar                            as A
 import Data.Array.Accelerate.Numeric.Sum.Arithmetic                 as A
 
 import Data.Proxy
@@ -107,6 +105,10 @@ class (Elt a, Elt (s a)) => Summation s a where
 data KBN a = KBN a a
   deriving (Show, Generic)
 
+pattern KBN_ :: Elt a => Exp a -> Exp a -> Exp (KBN a)
+pattern KBN_ s c = Pattern (c, s)
+{-# COMPLETE KBN_ #-}
+
 instance Elt a => Elt (KBN a)
 instance Elt a => IsProduct Elt (KBN a)
 
@@ -116,7 +118,7 @@ kbn :: Proxy KBN
 kbn = Proxy
 
 kbnAdd :: (Num a, Ord a, IsFloating a) => Exp (KBN a) -> Exp (KBN a) -> Exp (KBN a)
-kbnAdd (unlift -> KBN s1 c1) (unlift -> KBN s2 c2) = lift (KBN s' c')
+kbnAdd (KBN_ s1 c1) (KBN_ s2 c2) = KBN_ s' c'
   where
     s' = s1 `fadd` s2
     c' = c1 `fadd` c2 `fadd` if abs s1 >= abs s2
@@ -143,12 +145,10 @@ instance Summation KBN Double where
 
 instance (Lift Exp a, Elt (Plain a)) => Lift Exp (KBN a) where
   type Plain (KBN a) = KBN (Plain a)
-  lift (KBN a b)     = Exp $ Tuple $ NilTup `SnocTup` lift a
-                                               `SnocTup` lift b
+  lift (KBN a b)     = KBN_ (lift a) (lift b)
 
 instance Elt a => Unlift Exp (KBN (Exp a)) where
-  unlift t = KBN (Exp $ SuccTupIdx ZeroTupIdx `Prj` t)
-                 (Exp $ ZeroTupIdx `Prj` t)
+  unlift (KBN_ a b) = KBN a b
 
 
 -- | Second-order Kahan-Babuška summation.  This is more computationally costly
@@ -160,6 +160,10 @@ instance Elt a => Unlift Exp (KBN (Exp a)) where
 --
 data KB2 a = KB2 a a a
   deriving (Show, Generic)
+
+pattern KB2_ :: Elt a => Exp a -> Exp a -> Exp a -> Exp (KB2 a)
+pattern KB2_ s c cc = Pattern (s, c, cc)
+{-# COMPLETE KB2_ #-}
 
 instance Elt a => Elt (KB2 a)
 instance Elt a => IsProduct Elt (KB2 a)
@@ -202,14 +206,10 @@ instance Summation KB2 Double where
 
 instance (Lift Exp a, Elt (Plain a)) => Lift Exp (KB2 a) where
   type Plain (KB2 a) = KB2 (Plain a)
-  lift (KB2 a b c)   = Exp $ Tuple $ NilTup `SnocTup` lift a
-                                            `SnocTup` lift b
-                                            `SnocTup` lift c
+  lift (KB2 a b c)   = KB2_ (lift a) (lift b) (lift c)
 
 instance Elt a => Unlift Exp (KB2 (Exp a)) where
-  unlift t = KB2 (Exp $ SuccTupIdx (SuccTupIdx ZeroTupIdx) `Prj` t)
-                 (Exp $ SuccTupIdx ZeroTupIdx `Prj` t)
-                 (Exp $ ZeroTupIdx `Prj` t)
+  unlift (KB2_ a b c) = KB2 a b c
 
 
 -- | Kahan summation. This is the least accurate of the compensated summation
@@ -217,6 +217,10 @@ instance Elt a => Unlift Exp (KB2 (Exp a)) where
 --
 data Kahan a = Kahan a a
   deriving (Show, Generic)
+
+pattern Kahan_ :: Elt a => Exp a -> Exp a -> Exp (Kahan a)
+pattern Kahan_ s c = Pattern (s, c)
+{-# COMPLETE Kahan_ #-}
 
 instance Elt a => Elt (Kahan a)
 instance Elt a => IsProduct Elt (Kahan a)
@@ -227,7 +231,7 @@ kahan :: Proxy Kahan
 kahan = Proxy
 
 kahanAdd :: (Num a, IsFloating a) => Exp (Kahan a) -> Exp (Kahan a) -> Exp (Kahan a)
-kahanAdd (unlift -> Kahan s1 c1 :: Kahan (Exp a)) (unlift -> Kahan s2 c2) = lift (Kahan s' c')
+kahanAdd (Kahan_ s1 c1) (Kahan_ s2 c2) = Kahan_ s' c'
   where
     s'  = s1 `fadd` y
     c'  = (s' `fsub` s1) `fsub` y
@@ -253,10 +257,8 @@ instance Summation Kahan Double where
 
 instance (Lift Exp a, Elt (Plain a)) => Lift Exp (Kahan a) where
   type Plain (Kahan a) = Kahan (Plain a)
-  lift (Kahan a b)     = Exp $ Tuple $ NilTup `SnocTup` lift a
-                                              `SnocTup` lift b
+  lift (Kahan a b)     = Kahan_ (lift a) (lift b)
 
 instance Elt a => Unlift Exp (Kahan (Exp a)) where
-  unlift t = Kahan (Exp $ SuccTupIdx ZeroTupIdx `Prj` t)
-                   (Exp $ ZeroTupIdx `Prj` t)
+  unlift (Kahan_ a b) = Kahan a b
 
