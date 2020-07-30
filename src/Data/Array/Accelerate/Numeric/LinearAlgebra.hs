@@ -34,6 +34,7 @@ module Data.Array.Accelerate.Numeric.LinearAlgebra (
 ) where
 
 import Data.Array.Accelerate                                        as A
+import Data.Array.Accelerate.Data.Maybe
 
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 import Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level1
@@ -168,7 +169,7 @@ diagonal v =
   let n     = length v
       zeros = fill (index2 n n) 0
   in
-  permute const zeros (\(unindex1 -> i) -> index2 i i) v
+  permute const zeros (\(unindex1 -> i) -> lift . Just $ index2 i i) v
 
 -- | The sum of the diagonal elements of a (square) matrix
 --

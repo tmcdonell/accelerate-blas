@@ -110,7 +110,6 @@ pattern KBN_ s c = Pattern (c, s)
 {-# COMPLETE KBN_ #-}
 
 instance Elt a => Elt (KBN a)
-instance Elt a => IsProduct Elt (KBN a)
 
 -- | Return the result of a Kahan-Babuška-Neumaier sum.
 --
@@ -166,7 +165,6 @@ pattern KB2_ s c cc = Pattern (s, c, cc)
 {-# COMPLETE KB2_ #-}
 
 instance Elt a => Elt (KB2 a)
-instance Elt a => IsProduct Elt (KB2 a)
 
 -- | Return the result of a second-order Kahan-Babuška sum.
 --
@@ -223,7 +221,6 @@ pattern Kahan_ s c = Pattern (s, c)
 {-# COMPLETE Kahan_ #-}
 
 instance Elt a => Elt (Kahan a)
-instance Elt a => IsProduct Elt (Kahan a)
 
 -- | Return the result of a Kahan sum.
 --
