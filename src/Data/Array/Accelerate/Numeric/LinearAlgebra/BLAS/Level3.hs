@@ -5,6 +5,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators       #-}
 {-# LANGUAGE ViewPatterns        #-}
+{-# LANGUAGE TypeApplications    #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level3
 -- Copyright   : [2017] Trevor L. McDonell
@@ -64,7 +65,7 @@ gemm alpha opA matA opB matB = go (lift (unit alpha, matA, matB))
   where
     go =
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
-      foreignAcc (CPU.gemm opA opB) $
+      foreignAcc (CPU.gemm @e opA opB) $
 #endif
 #ifdef ACCELERATE_LLVM_PTX_BACKEND
       foreignAcc (PTX.gemm opA opB) $
@@ -105,4 +106,3 @@ gemm alpha opA matA opB matB = go (lift (unit alpha, matA, matB))
                         NumericRcomplex32 -> map conjugate brr
                         NumericRcomplex64 -> map conjugate brr
                         _                 -> brr
-

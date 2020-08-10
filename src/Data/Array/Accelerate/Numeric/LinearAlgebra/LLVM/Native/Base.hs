@@ -2,6 +2,7 @@
 {-# LANGUAGE GADTs               #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies        #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
 -- Copyright   : [2017] Trevor L. McDonell
@@ -15,36 +16,30 @@
 module Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
   where
 
-import Data.Array.Accelerate.Array.Sugar                            ( Array(..), EltRepr )
-import Data.Array.Accelerate.Array.Data
-import Data.Array.Accelerate.Array.Unique
+import Data.Array.Accelerate                                        as A
+import Data.Array.Accelerate.Representation.Array                   as Repr
+import qualified Data.Array.Accelerate.Array.Unique                 as Unique
+import qualified Data.Array.Accelerate.Sugar.Elt                    as Sugar
+
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
+import Foreign.Ptr                                                  (Ptr)
 
 import qualified Blas.Primitive.Types                               as C
-
 
 encodeTranspose :: Transpose -> C.Transpose
 encodeTranspose N = C.NoTrans
 encodeTranspose T = C.Trans
 encodeTranspose H = C.ConjTrans
 
-
 {-# INLINE withArray #-}
 withArray
-    :: forall sh e b. Numeric e
-    => Array sh e
-    -> (ArrayPtrs (EltRepr e) -> IO b)
+    :: forall sh e b . (Numeric e)
+    => Repr.Array sh (Sugar.EltR e)
+    -> (Ptr (Sugar.EltR e) -> IO b)
     -> IO b
-withArray (Array _ adata) = withArrayData (numericR::NumericR e) adata
-
-{-# INLINE withArrayData #-}
-withArrayData
-    :: NumericR e
-    -> ArrayData (EltRepr e)
-    -> (ArrayPtrs (EltRepr e) -> IO b)
-    -> IO b
-withArrayData NumericRfloat32   (AD_Float  ua)            f = withUniqueArrayPtr ua f
-withArrayData NumericRfloat64   (AD_Double ua)            f = withUniqueArrayPtr ua f
-withArrayData NumericRcomplex32 (AD_Vec _ (AD_Float  ua)) f = withUniqueArrayPtr ua f
-withArrayData NumericRcomplex64 (AD_Vec _ (AD_Double ua)) f = withUniqueArrayPtr ua f
-
+withArray (Repr.Array _ ad) k =
+  -- TODO: explain in comment what this does
+  case numericR :: NumericR e of
+    NumericRfloat32 -> Unique.withUniqueArrayPtr (ad :: Unique.UniqueArray Float) k
+    NumericRfloat64 -> Unique.withUniqueArrayPtr (ad :: Unique.UniqueArray Double) k
+    _ -> error "TODO" -- TODO

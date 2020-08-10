@@ -5,6 +5,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators       #-}
 {-# LANGUAGE ViewPatterns        #-}
+{-# LANGUAGE TypeApplications    #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level2
 -- Copyright   : [2017] Trevor L. McDonell
@@ -63,7 +64,7 @@ gemv alpha opA matA x = go (lift (unit alpha, matA, x))
   where
     go =
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
-      foreignAcc (CPU.gemv opA) $
+      foreignAcc (CPU.gemv @e opA) $
 #endif
 #ifdef ACCELERATE_LLVM_PTX_BACKEND
       foreignAcc (PTX.gemv opA) $
