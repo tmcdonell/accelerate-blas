@@ -62,6 +62,7 @@ module Data.Array.Accelerate.Numeric.Sum (
 import Data.Array.Accelerate                                        as A hiding ( sum, fromInteger )
 import Data.Array.Accelerate.Type                                   as A
 import Data.Array.Accelerate.Numeric.Sum.Arithmetic                 as A
+import qualified Data.Array.Accelerate.Sugar.Elt                    as Sugar
 
 import Data.Proxy
 import Prelude                                                      ( Show, fromInteger )
@@ -116,7 +117,8 @@ instance Elt a => Elt (KBN a)
 kbn :: Proxy KBN
 kbn = Proxy
 
-kbnAdd :: (Num a, Ord a, IsFloating a) => Exp (KBN a) -> Exp (KBN a) -> Exp (KBN a)
+-- TODO: remove IsFloating a constraint
+kbnAdd :: (Num a, Ord a, IsFloating a, IsFloating (Sugar.EltR a)) => Exp (KBN a) -> Exp (KBN a) -> Exp (KBN a)
 kbnAdd (KBN_ s1 c1) (KBN_ s2 c2) = KBN_ s' c'
   where
     s' = s1 `fadd` s2
@@ -171,7 +173,8 @@ instance Elt a => Elt (KB2 a)
 kb2 :: Proxy KB2
 kb2 = Proxy
 
-kb2Add :: (Num a, Ord a, IsFloating a) => Exp (KB2 a) -> Exp (KB2 a) -> Exp (KB2 a)
+-- TODO: remove IsFloating a constraint
+kb2Add :: (Num a, Ord a, IsFloating a, IsFloating (Sugar.EltR a)) => Exp (KB2 a) -> Exp (KB2 a) -> Exp (KB2 a)
 kb2Add (unlift -> KB2 s1 c1 cc1) (unlift -> KB2 s2 c2 cc2) = lift (KB2 sum' c' cc')
   where
     sum'  = s1 `fadd` s2
@@ -227,7 +230,8 @@ instance Elt a => Elt (Kahan a)
 kahan :: Proxy Kahan
 kahan = Proxy
 
-kahanAdd :: (Num a, IsFloating a) => Exp (Kahan a) -> Exp (Kahan a) -> Exp (Kahan a)
+-- TODO: remove IsFloating a constraint
+kahanAdd :: (Num a, IsFloating a, IsFloating (Sugar.EltR a)) => Exp (Kahan a) -> Exp (Kahan a) -> Exp (Kahan a)
 kahanAdd (Kahan_ s1 c1) (Kahan_ s2 c2) = Kahan_ s' c'
   where
     s'  = s1 `fadd` y
