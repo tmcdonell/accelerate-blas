@@ -2,9 +2,10 @@
 {-# LANGUAGE GADTs               #-}
 {-# LANGUAGE NoImplicitPrelude   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications    #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level1
--- Copyright   : [2017] Trevor L. McDonell
+-- Copyright   : [2017..2020] Trevor L. McDonell
 -- License     : BSD3
 --
 -- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
@@ -42,7 +43,7 @@ import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 --
 sdot :: forall e. Numeric e => Exp e -> Acc (Vector e) -> Acc (Vector e) -> Acc (Scalar e)
 sdot z xs ys =
-  case numericR :: NumericR e of
+  case numericR @e of
     NumericRfloat32   -> map toFloating $ dsdot (toFloating z) (map toFloating xs) (map toFloating ys)
     NumericRfloat64   -> dsdot z xs ys
     NumericRcomplex32 -> map d2f $ zsdot (f2d z) (map f2d xs) (map f2d ys)
@@ -86,7 +87,7 @@ dotc :: forall e. Numeric (Complex e)
      -> Acc (Vector (Complex e))
      -> Acc (Scalar (Complex e))
 dotc xs ys =
-  case numericR :: NumericR (Complex e) of
+  case numericR @(Complex e) of
     NumericRcomplex32 -> dotu (map conjugate xs) ys
     NumericRcomplex64 -> dotu (map conjugate xs) ys
 
@@ -98,7 +99,7 @@ dotc xs ys =
 --
 asum :: forall e. Numeric e => Acc (Vector e) -> Acc (Scalar (NumericBaseT e))
 asum =
-  case numericR :: NumericR e of
+  case numericR @e of
     NumericRfloat32   -> sum . map abs
     NumericRfloat64   -> sum . map abs
     NumericRcomplex32 -> sum . map mag
@@ -113,7 +114,7 @@ asum =
 --
 amax :: forall e. Numeric e => Acc (Vector e) -> Acc (Scalar Int)
 amax =
-  case numericR :: NumericR e of
+  case numericR @e of
     NumericRfloat32   -> map (indexHead . fst) . fold1 cmp . indexed . map abs
     NumericRfloat64   -> map (indexHead . fst) . fold1 cmp . indexed . map abs
     NumericRcomplex32 -> map (indexHead . fst) . fold1 cmp . indexed . map mag
@@ -128,7 +129,7 @@ amax =
 --
 amin :: forall e. Numeric e => Acc (Vector e) -> Acc (Scalar Int)
 amin =
-  case numericR :: NumericR e of
+  case numericR @e of
     NumericRfloat32   -> map (indexHead . fst) . fold1 cmp . indexed . map abs
     NumericRfloat64   -> map (indexHead . fst) . fold1 cmp . indexed . map abs
     NumericRcomplex32 -> map (indexHead . fst) . fold1 cmp . indexed . map mag

@@ -1,12 +1,10 @@
-{-# LANGUAGE CPP               #-}
-{-# LANGUAGE ConstraintKinds   #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs             #-}
 {-# LANGUAGE TypeFamilies      #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.LinearAlgebra.Type
--- Copyright   : [2017] Trevor L. McDonell
+-- Copyright   : [2017..2020] Trevor L. McDonell
 -- License     : BSD3
 --
 -- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
@@ -16,15 +14,14 @@
 
 module Data.Array.Accelerate.Numeric.LinearAlgebra.Type (
 
-#if MIN_VERSION_accelerate(1,2,0)
-  Matrix,
-#endif
   module Data.Array.Accelerate.Numeric.LinearAlgebra.Type,
 
 ) where
 
 import Data.Array.Accelerate                                        as A
 import Data.Array.Accelerate.Data.Complex                           as A
+import Data.Array.Accelerate.Sugar.Elt
+import Data.Primitive.Vec
 
 import qualified Prelude                                            as P
 
@@ -32,14 +29,14 @@ import qualified Prelude                                            as P
 -- For explicit dictionary reification, to recover the type the operation should
 -- be performed at.
 --
-data NumericR a where
-  NumericRfloat32   :: NumericR Float
-  NumericRfloat64   :: NumericR Double
-  NumericRcomplex32 :: NumericR (Complex Float)
-  NumericRcomplex64 :: NumericR (Complex Double)
+data NumericR s r where
+  NumericRfloat32   :: NumericR Float Float
+  NumericRfloat64   :: NumericR Double Double
+  NumericRcomplex32 :: NumericR (Complex Float) (Vec2 Float)
+  NumericRcomplex64 :: NumericR (Complex Double) (Vec2 Double)
 
-class (Elt a, Num a) => Numeric a where
-  numericR :: NumericR a
+class Num a => Numeric a where
+  numericR :: NumericR a (EltR a)
 
 instance Numeric Float where
   numericR = NumericRfloat32
@@ -64,12 +61,6 @@ type family NumericBaseT t where
   NumericBaseT (Complex Float)  = Float
   NumericBaseT (Complex Double) = Double
 
-
-#if !MIN_VERSION_accelerate(1,2,0)
--- | Matrices as dense two-dimensional arrays in row-major ordering
---
-type Matrix e = Array DIM2 e
-#endif
 
 -- | Orientation of the underlying data.
 --

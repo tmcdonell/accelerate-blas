@@ -22,6 +22,7 @@ import Criterion.Main
 import Data.Proxy
 import Foreign.Storable
 import Numeric.LinearAlgebra                                        hiding ( randomVector )
+import Prelude                                                      hiding ( (<>) )
 import System.Random.MWC
 import Text.Printf
 

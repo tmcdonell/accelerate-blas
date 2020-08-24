@@ -1,27 +1,40 @@
 # For more information, see: https://github.com/commercialhaskell/stack/blob/release/doc/yaml_configuration.md
 # vim: nospell
 
-resolver: lts-12.26
+resolver: nightly-2020-08-20
 
 packages:
 - .
 
 extra-deps:
 - github: tmcdonell/accelerate
-  commit: cc78ca8ba7397b445418e0646111753ec86bfcdd
+  commit: d7caff6f9153b93ca467360f8f3cdc5975685c2f
 
 - github: tmcdonell/accelerate-llvm
-  commit: fb1d36cf603f0b3d219278ebc841effaa17e9fe9
+  commit: 4217ca6c68402691dcefb5d578846a41353aaa2a
   subdirs:
     - accelerate-llvm
     - accelerate-llvm-native
     - accelerate-llvm-ptx
 
-- cublas-0.5.0.0
-- cuda-0.10.0.0
-- mwc-random-accelerate-0.1.0.0
-- nvvm-0.9.0.0
-- primitive-0.6.4.0
+- github: tmcdonell/cuda
+  commit: 1128c99c2e7a41b5e21363a9bf12c7bb240184ac
+
+- github: tmcdonell/nvvm
+  commit: 4b0ee7b1644a71f56a4d024dda3d40f225ac1f05
+
+- github: tmcdonell/cublas
+  commit: 676e0fa48820466c1e5ae66fe8efcee39912c063
+
+- github: tmcdonell/mwc-random-accelerate
+  commit: 804b2e7cced00c59cd6db36a1076fcb1dca3cfb0
+
+- blas-hs-0.1.1.0
+
+# Extra per-package and global ghc options
+# Required because Cabal-3 is a broken POS
+ghc-options:
+  llvm-hs: -optcxx=-std=c++11
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

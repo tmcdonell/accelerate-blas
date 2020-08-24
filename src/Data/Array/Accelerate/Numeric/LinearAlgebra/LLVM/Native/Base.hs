@@ -1,11 +1,8 @@
-{-# LANGUAGE FlexibleContexts    #-}
-{-# LANGUAGE GADTs               #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeFamilies        #-}
-{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE GADTs        #-}
+{-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
--- Copyright   : [2017] Trevor L. McDonell
+-- Copyright   : [2017..2020] Trevor L. McDonell
 -- License     : BSD3
 --
 -- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
@@ -16,15 +13,22 @@
 module Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
   where
 
-import Data.Array.Accelerate                                        as A
-import Data.Array.Accelerate.Representation.Array                   as Repr
-import qualified Data.Array.Accelerate.Array.Unique                 as Unique
-import qualified Data.Array.Accelerate.Sugar.Elt                    as Sugar
+import Data.Array.Accelerate.Representation.Array
+import Data.Array.Accelerate.Array.Data
+import Data.Array.Accelerate.Array.Unique
+import Data.Primitive.Vec
 
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
 import Foreign.Ptr                                                  (Ptr)
 
 import qualified Blas.Primitive.Types                               as C
+
+
+type family ArrayPtrs e :: *
+type instance ArrayPtrs Float         = Ptr Float
+type instance ArrayPtrs Double        = Ptr Double
+type instance ArrayPtrs (Vec2 Float)  = Ptr Float
+type instance ArrayPtrs (Vec2 Double) = Ptr Double
 
 encodeTranspose :: Transpose -> C.Transpose
 encodeTranspose N = C.NoTrans
@@ -33,13 +37,20 @@ encodeTranspose H = C.ConjTrans
 
 {-# INLINE withArray #-}
 withArray
-    :: forall sh e b . (Numeric e)
-    => Repr.Array sh (Sugar.EltR e)
-    -> (Ptr (Sugar.EltR e) -> IO b)
+    :: NumericR s e
+    -> Array sh e
+    -> (ArrayPtrs e -> IO b)
     -> IO b
-withArray (Repr.Array _ ad) k =
-  -- TODO: explain in comment what this does
-  case numericR :: NumericR e of
-    NumericRfloat32 -> Unique.withUniqueArrayPtr (ad :: Unique.UniqueArray Float) k
-    NumericRfloat64 -> Unique.withUniqueArrayPtr (ad :: Unique.UniqueArray Double) k
-    _ -> error "TODO" -- TODO
+withArray nR (Array _ ad) k = withArrayData nR ad k
+
+{-# INLINE withArrayData #-}
+withArrayData
+    :: NumericR s e
+    -> ArrayData e
+    -> (ArrayPtrs e -> IO b)
+    -> IO b
+withArrayData NumericRfloat32   = withUniqueArrayPtr
+withArrayData NumericRfloat64   = withUniqueArrayPtr
+withArrayData NumericRcomplex32 = withUniqueArrayPtr
+withArrayData NumericRcomplex64 = withUniqueArrayPtr
+

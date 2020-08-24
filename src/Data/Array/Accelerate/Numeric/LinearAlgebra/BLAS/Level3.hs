@@ -8,7 +8,7 @@
 {-# LANGUAGE TypeApplications    #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.LinearAlgebra.BLAS.Level3
--- Copyright   : [2017] Trevor L. McDonell
+-- Copyright   : [2017..2020] Trevor L. McDonell
 -- License     : BSD3
 --
 -- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
@@ -65,12 +65,14 @@ gemm alpha opA matA opB matB = go (lift (unit alpha, matA, matB))
   where
     go =
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
-      foreignAcc (CPU.gemm @e opA opB) $
+      foreignAcc (CPU.gemm nR opA opB) $
 #endif
 #ifdef ACCELERATE_LLVM_PTX_BACKEND
-      foreignAcc (PTX.gemm opA opB) $
+      foreignAcc (PTX.gemm nR opA opB) $
 #endif
       (\(T3 _ arr brr) -> mXm arr brr)
+
+    nR = numericR @e
 
     -- General dense matrix-matrix multiply written in pure Accelerate. This is
     -- not efficient due to the memory access patterns. We could probably
@@ -92,7 +94,7 @@ gemm alpha opA matA opB matB = go (lift (unit alpha, matA, matB))
         arr' = case opA of
                  N -> arr
                  T -> transpose arr
-                 H -> case numericR :: NumericR e of
+                 H -> case nR of
                         NumericRcomplex32 -> map conjugate (transpose arr)
                         NumericRcomplex64 -> map conjugate (transpose arr)
                         _                 -> transpose arr
@@ -102,7 +104,8 @@ gemm alpha opA matA opB matB = go (lift (unit alpha, matA, matB))
         brr' = case opB of
                  N -> transpose brr
                  T -> brr
-                 H -> case numericR :: NumericR e of
+                 H -> case nR of
                         NumericRcomplex32 -> map conjugate brr
                         NumericRcomplex64 -> map conjugate brr
                         _                 -> brr
+

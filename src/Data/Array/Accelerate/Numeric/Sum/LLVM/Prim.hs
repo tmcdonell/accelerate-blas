@@ -1,15 +1,10 @@
-{-# LANGUAGE CPP             #-}
-{-# LANGUAGE GADTs           #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE ViewPatterns    #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE CPP          #-}
+{-# LANGUAGE GADTs        #-}
+{-# LANGUAGE LambdaCase   #-}
+{-# LANGUAGE ViewPatterns #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.Sum.LLVM.Prim
--- Copyright   : [2017] Trevor L. McDonell
+-- Copyright   : [2017..2020] Trevor L. McDonell
 -- License     : BSD3
 --
 -- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
@@ -23,16 +18,15 @@ module Data.Array.Accelerate.Numeric.Sum.LLVM.Prim (
 
 ) where
 
-import Data.Array.Accelerate.Type
 import Data.Array.Accelerate.Error
-import qualified Data.Array.Accelerate.Sugar.Elt                    as Sugar
+import Data.Array.Accelerate.Type
+import Data.Array.Accelerate.Sugar.Elt
 
 import Data.Array.Accelerate.LLVM.CodeGen.IR                        ( Operands(..), IROP(..) )
 import Data.Array.Accelerate.LLVM.CodeGen.Monad                     ( CodeGen, freshName, instr_ )
 import Data.Array.Accelerate.LLVM.CodeGen.Sugar                     ( IROpenFun1(..) )
 
 import LLVM.AST.Type.Downcast                                       ( downcast )
-import qualified Data.Array.Accelerate.LLVM.CodeGen.Arithmetic      as A
 import qualified LLVM.AST.Type.Name                                 as A
 import qualified LLVM.AST.Type.Operand                              as A
 import qualified LLVM.AST.Type.Representation                       as A
@@ -44,26 +38,34 @@ import LLVM.AST.Type                                                ( Type(..), 
 
 import Prelude                                                      hiding (uncurry)
 
+
 uncurry :: (Operands a -> Operands b -> c) -> Operands (((), a), b) -> c
 uncurry f (OP_Unit `OP_Pair` x `OP_Pair` y) = f x y
 
 -- | As (+), but don't allow potentially unsafe floating-point optimisations.
 --
-fadd :: FloatingType (Sugar.EltR a) -> IROpenFun1 arch env aenv (Sugar.EltR (a,a) -> Sugar.EltR a)
-fadd t = IRFun1 $ uncurry (binop FAdd t)
+fadd :: FloatingType a -> IROpenFun1 arch env aenv ((((), EltR a), EltR a) -> EltR a)
+fadd = \case
+  TypeHalf   -> IRFun1 $ uncurry (binop FAdd TypeHalf)    -- the pattern match yields a ~ EltR a
+  TypeFloat  -> IRFun1 $ uncurry (binop FAdd TypeFloat)
+  TypeDouble -> IRFun1 $ uncurry (binop FAdd TypeDouble)
 
 -- | As (-), but don't allow potentially unsafe floating-point optimisations.
 --
-fsub :: FloatingType (Sugar.EltR a) -> IROpenFun1 arch env aenv (Sugar.EltR (a,a) -> Sugar.EltR a)
-fsub t = IRFun1 $ uncurry (binop FSub t)
+fsub :: FloatingType a -> IROpenFun1 arch env aenv ((((), EltR a), EltR a) -> EltR a)
+fsub = \case
+  TypeHalf   -> IRFun1 $ uncurry (binop FSub TypeHalf)
+  TypeFloat  -> IRFun1 $ uncurry (binop FSub TypeFloat)
+  TypeDouble -> IRFun1 $ uncurry (binop FSub TypeDouble)
 
 -- | As (*), but don't allow potentially unsafe floating-point optimisations.
 --
-fmul :: FloatingType (Sugar.EltR a) -> IROpenFun1 arch env aenv (Sugar.EltR (a,a) -> Sugar.EltR a)
-fmul t = IRFun1 $ uncurry (binop FMul t)
+fmul :: FloatingType a -> IROpenFun1 arch env aenv ((((), EltR a), EltR a) -> EltR a)
+fmul = \case
+  TypeHalf   -> IRFun1 $ uncurry (binop FMul TypeHalf)
+  TypeFloat  -> IRFun1 $ uncurry (binop FMul TypeFloat)
+  TypeDouble -> IRFun1 $ uncurry (binop FMul TypeDouble)
 
--- use of 'op' mandates that t ~ u for (FloatingType t) and (Operands u)- how to
--- fix?
 binop :: (FastMathFlags -> Operand -> Operand -> InstructionMetadata -> Instruction)
       -> FloatingType a
       -> Operands a
@@ -96,5 +98,5 @@ upcast :: FloatingType t -> Operand -> Operands t
 upcast TypeHalf{}    (LocalReference (FloatingPointType HalfFP)   (UnName x)) = OP_Half    (A.LocalReference A.type' (A.UnName x))
 upcast TypeFloat{}   (LocalReference (FloatingPointType FloatFP)  (UnName x)) = OP_Float   (A.LocalReference A.type' (A.UnName x))
 upcast TypeDouble{}  (LocalReference (FloatingPointType DoubleFP) (UnName x)) = OP_Double  (A.LocalReference A.type' (A.UnName x))
--- TODO: is this supposed to be at compile-time?
 upcast _ _ = internalError "upcast" "expected local reference"
+
