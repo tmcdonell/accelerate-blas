@@ -38,7 +38,7 @@ jobs:
             allow_failure: false
 
           - os: macOS-latest
-            ghc: "8.8"
+            ghc: "8.10"
             llvm: "9"
             cuda: ""
             allow_failure: false
