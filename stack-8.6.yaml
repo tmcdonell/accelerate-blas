@@ -17,6 +17,9 @@ extra-deps:
     - accelerate-llvm-native
     - accelerate-llvm-ptx
 
+- github: tmcdonell/cublas
+  commit: b9b24f53e196989e066626fbc3289f83e336432a
+
 - mwc-random-accelerate-0.1.0.0
 
 # Override default flag values for local packages and extra-deps

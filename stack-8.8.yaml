@@ -24,7 +24,7 @@ extra-deps:
   commit: 4b0ee7b1644a71f56a4d024dda3d40f225ac1f05
 
 - github: tmcdonell/cublas
-  commit: 676e0fa48820466c1e5ae66fe8efcee39912c063
+  commit: b9b24f53e196989e066626fbc3289f83e336432a
 
 - github: tmcdonell/mwc-random-accelerate
   commit: 804b2e7cced00c59cd6db36a1076fcb1dca3cfb0
