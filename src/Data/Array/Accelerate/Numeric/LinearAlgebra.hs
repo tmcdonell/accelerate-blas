@@ -1,10 +1,9 @@
 {-# LANGUAGE ConstraintKinds   #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE ViewPatterns      #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.LinearAlgebra
--- Copyright   : [2017] Trevor L. McDonell
+-- Copyright   : [2017..2020] Trevor L. McDonell
 -- License     : BSD3
 --
 -- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
@@ -166,14 +165,14 @@ identity n = diagonal (fill (index1 n) 1)
 diagonal :: Num e => Acc (Vector e) -> Acc (Matrix e)
 diagonal v =
   let n     = length v
-      zeros = fill (index2 n n) 0
+      zeros = fill (I2 n n) 0
   in
-  permute const zeros (\(unindex1 -> i) -> index2 i i) v
+  permute const zeros (\(I1 i) -> Just_ (I2 i i)) v
 
 -- | The sum of the diagonal elements of a (square) matrix
 --
 trace :: Num e => Acc (Matrix e) -> Acc (Scalar e)
 trace m =
   let Z :. h :. w = unlift (shape m)
-  in  sum (backpermute (index1 (min h w)) (\(unindex1 -> i) -> index2 i i) m)
+  in  sum (backpermute (index1 (min h w)) (\(I1 i) -> I2 i i) m)
 

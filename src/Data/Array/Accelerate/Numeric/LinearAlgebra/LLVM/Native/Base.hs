@@ -1,10 +1,8 @@
-{-# LANGUAGE FlexibleContexts    #-}
-{-# LANGUAGE GADTs               #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeFamilies        #-}
+{-# LANGUAGE GADTs        #-}
+{-# LANGUAGE TypeFamilies #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
--- Copyright   : [2017] Trevor L. McDonell
+-- Copyright   : [2017..2020] Trevor L. McDonell
 -- License     : BSD3
 --
 -- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
@@ -15,36 +13,44 @@
 module Data.Array.Accelerate.Numeric.LinearAlgebra.LLVM.Native.Base
   where
 
-import Data.Array.Accelerate.Array.Sugar                            ( Array(..), EltRepr )
+import Data.Array.Accelerate.Representation.Array
 import Data.Array.Accelerate.Array.Data
 import Data.Array.Accelerate.Array.Unique
+import Data.Primitive.Vec
+
 import Data.Array.Accelerate.Numeric.LinearAlgebra.Type
+import Foreign.Ptr                                                  (Ptr)
 
 import qualified Blas.Primitive.Types                               as C
 
+
+type family ArrayPtrs e :: *
+type instance ArrayPtrs Float         = Ptr Float
+type instance ArrayPtrs Double        = Ptr Double
+type instance ArrayPtrs (Vec2 Float)  = Ptr Float
+type instance ArrayPtrs (Vec2 Double) = Ptr Double
 
 encodeTranspose :: Transpose -> C.Transpose
 encodeTranspose N = C.NoTrans
 encodeTranspose T = C.Trans
 encodeTranspose H = C.ConjTrans
 
-
 {-# INLINE withArray #-}
 withArray
-    :: forall sh e b. Numeric e
-    => Array sh e
-    -> (ArrayPtrs (EltRepr e) -> IO b)
+    :: NumericR s e
+    -> Array sh e
+    -> (ArrayPtrs e -> IO b)
     -> IO b
-withArray (Array _ adata) = withArrayData (numericR::NumericR e) adata
+withArray nR (Array _ ad) k = withArrayData nR ad k
 
 {-# INLINE withArrayData #-}
 withArrayData
-    :: NumericR e
-    -> ArrayData (EltRepr e)
-    -> (ArrayPtrs (EltRepr e) -> IO b)
+    :: NumericR s e
+    -> ArrayData e
+    -> (ArrayPtrs e -> IO b)
     -> IO b
-withArrayData NumericRfloat32   (AD_Float  ua)            f = withUniqueArrayPtr ua f
-withArrayData NumericRfloat64   (AD_Double ua)            f = withUniqueArrayPtr ua f
-withArrayData NumericRcomplex32 (AD_Vec _ (AD_Float  ua)) f = withUniqueArrayPtr ua f
-withArrayData NumericRcomplex64 (AD_Vec _ (AD_Double ua)) f = withUniqueArrayPtr ua f
+withArrayData NumericRfloat32   = withUniqueArrayPtr
+withArrayData NumericRfloat64   = withUniqueArrayPtr
+withArrayData NumericRcomplex32 = withUniqueArrayPtr
+withArrayData NumericRcomplex64 = withUniqueArrayPtr
 

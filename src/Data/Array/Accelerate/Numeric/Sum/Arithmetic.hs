@@ -3,7 +3,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.Sum.Arithmetic
--- Copyright   : [2017] Trevor L. McDonell
+-- Copyright   : [2017..2020] Trevor L. McDonell
 -- License     : BSD3
 --
 -- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>

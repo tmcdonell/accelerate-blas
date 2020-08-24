@@ -16,9 +16,10 @@
 
 module Test.Util where
 
-import Data.Array.Accelerate                                        ( Acc, Arrays, Array, Shape, Elt, fromList )
-import Data.Array.Accelerate.Array.Sugar                            ( size )
-import Data.Array.Accelerate.Trafo                                  ( Afunction, AfunctionR )
+import Data.Array.Accelerate                                        ( Acc, Arrays, Array, Elt, fromList )
+import Data.Array.Accelerate.Trafo                                  ( Afunction )
+import Data.Array.Accelerate.Trafo.Sharing                          ( AfunctionR )
+import Data.Array.Accelerate.Sugar.Shape
 import Data.Array.Accelerate.Data.Complex
 
 import Hedgehog

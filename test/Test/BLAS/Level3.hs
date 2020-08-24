@@ -29,7 +29,7 @@ import Test.Tasty.Hedgehog
 
 
 test_gemm
-    :: (Numeric e, Similar e)
+    :: (Show e, Numeric e, Similar e)
     => Run
     -> Range Int
     -> Gen e

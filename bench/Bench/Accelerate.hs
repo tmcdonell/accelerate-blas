@@ -20,7 +20,8 @@ module Bench.Accelerate ( bench_accelerate )
 import Bench.Util
 
 import Data.Array.Accelerate                                        ( Elt, Z(..), (:.)(..) )
-import Data.Array.Accelerate.Trafo                                  ( Afunction, AfunctionR )
+import Data.Array.Accelerate.Trafo                                  ( Afunction )
+import Data.Array.Accelerate.Trafo.Sharing                          ( AfunctionR )
 import Data.Array.Accelerate.Numeric.LinearAlgebra
 import Data.Array.Accelerate.Data.Complex
 import Data.Array.Accelerate.System.Random.MWC
@@ -28,6 +29,8 @@ import Data.Array.Accelerate.System.Random.MWC
 import Criterion.Main
 import Data.Proxy
 import Text.Printf
+import Prelude                                                      hiding ( (<>) )
+
 
 type RunN = forall f. Afunction f => f -> AfunctionR f
 

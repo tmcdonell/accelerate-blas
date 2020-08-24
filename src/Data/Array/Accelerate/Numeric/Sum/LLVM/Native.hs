@@ -1,7 +1,9 @@
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE CPP                 #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications    #-}
 -- |
 -- Module      : Data.Array.Accelerate.Numeric.Sum.LLVM.Native
--- Copyright   : [2017] Trevor L. McDonell
+-- Copyright   : [2017..2020] Trevor L. McDonell
 -- License     : BSD3
 --
 -- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
@@ -16,6 +18,7 @@ module Data.Array.Accelerate.Numeric.Sum.LLVM.Native (
 ) where
 
 import Data.Array.Accelerate                                        as A
+import Data.Array.Accelerate.Sugar.Elt
 import Data.Array.Accelerate.Type
 
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
@@ -27,7 +30,7 @@ import qualified Data.Array.Accelerate.Numeric.Sum.LLVM.Prim        as Prim
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
 wrap2 :: (Elt a, Elt b, Elt c)
       => String                                       -- name of the operation
-      -> IRFun1 Native () ((a, b) -> c)               -- foreign implementation
+      -> IRFun1 Native () (EltR (a, b) -> EltR c)     -- foreign implementation
       -> (Exp a -> Exp b -> Exp c)                    -- fallback implementation
       -> Exp a
       -> Exp b
@@ -35,23 +38,23 @@ wrap2 :: (Elt a, Elt b, Elt c)
 wrap2 str f g = A.curry (foreignExp (ForeignExp str f) (A.uncurry g))
 #endif
 
-fadd :: (IsFloating a, Elt a) => (Exp a -> Exp a -> Exp a) -> Exp a -> Exp a -> Exp a
+fadd :: forall a. (Elt a, IsFloating a) => (Exp a -> Exp a -> Exp a) -> Exp a -> Exp a -> Exp a
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
-fadd = wrap2 "fadd" (Prim.fadd floatingType)
+fadd = wrap2 "fadd" (Prim.fadd (floatingType @a))
 #else
 fadd = id
 #endif
 
-fsub :: (IsFloating a, Elt a) => (Exp a -> Exp a -> Exp a) -> Exp a -> Exp a -> Exp a
+fsub :: forall a. (Elt a, IsFloating a) => (Exp a -> Exp a -> Exp a) -> Exp a -> Exp a -> Exp a
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
-fsub = wrap2 "fsub" (Prim.fsub floatingType)
+fsub = wrap2 "fsub" (Prim.fsub (floatingType @a))
 #else
 fsub = id
 #endif
 
-fmul :: (IsFloating a, Elt a) => (Exp a -> Exp a -> Exp a) -> Exp a -> Exp a -> Exp a
+fmul :: forall a. (Elt a, IsFloating a) => (Exp a -> Exp a -> Exp a) -> Exp a -> Exp a -> Exp a
 #ifdef ACCELERATE_LLVM_NATIVE_BACKEND
-fmul = wrap2 "fmul" (Prim.fmul floatingType)
+fmul = wrap2 "fmul" (Prim.fmul (floatingType @a))
 #else
 fmul = id
 #endif

@@ -8,14 +8,17 @@ packages:
 
 extra-deps:
 - github: tmcdonell/accelerate
-  commit: cc78ca8ba7397b445418e0646111753ec86bfcdd
+  commit: d7caff6f9153b93ca467360f8f3cdc5975685c2f
 
 - github: tmcdonell/accelerate-llvm
-  commit: fb1d36cf603f0b3d219278ebc841effaa17e9fe9
+  commit: 4217ca6c68402691dcefb5d578846a41353aaa2a
   subdirs:
     - accelerate-llvm
     - accelerate-llvm-native
     - accelerate-llvm-ptx
+
+- github: tmcdonell/cublas
+  commit: b9b24f53e196989e066626fbc3289f83e336432a
 
 - mwc-random-accelerate-0.1.0.0
 
