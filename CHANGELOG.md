@@ -7,9 +7,14 @@ project adheres to the [Haskell Package Versioning
 Policy (PVP)](https://pvp.haskell.org)
 
 
+## [0.3.0.0] - 2020-08-26
+### Changed
+  * update for accelerate-1.3
+  * support LLVM-9
+
 ## [0.2.0.0] - 2018-04-03
 ### Changed
-  * Update for AoS representation of complex numbers
+  * update for AoS representation of complex numbers
 
 ### Added
   * support for LLVM-6.0
@@ -22,6 +27,7 @@ Policy (PVP)](https://pvp.haskell.org)
   * First version. Released on an unsuspecting world.
 
 
+[0.3.0.0]:          https://github.com/tmcdonell/accelerate-blas/compare/0.2.0.0...v0.3.0.0
 [0.2.0.0]:          https://github.com/tmcdonell/accelerate-blas/compare/0.1.0.1...0.2.0.0
 [0.1.0.1]:          https://github.com/tmcdonell/accelerate-blas/compare/0.1.0.0...0.1.0.1
 [0.1.0.0]:          https://github.com/tmcdonell/accelerate-blas/compare/4c89f4e6c62b8de3f37855ab2e4d27046b2495b2...0.1.0.0
