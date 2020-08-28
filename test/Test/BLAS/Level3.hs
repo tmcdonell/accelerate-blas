@@ -1,10 +1,10 @@
 {-# LANGUAGE RankNTypes #-}
 -- |
 -- Module      : Test.BLAS.Level3
--- Copyright   : [2017] Trevor L. McDonell
+-- Copyright   : [2017..2020] Trevor L. McDonell
 -- License     : BSD3
 --
--- Maintainer  : Trevor L. McDonell <tmcdonell@cse.unsw.edu.au>
+-- Maintainer  : Trevor L. McDonell <trevor.mcdonell@gmail.com>
 -- Stability   : experimental
 -- Portability : non-portable (GHC extensions)
 --
@@ -29,7 +29,7 @@ import Test.Tasty.Hedgehog
 
 
 test_gemm
-    :: (Numeric e, Similar e)
+    :: (Show e, Numeric e, Similar e)
     => Run
     -> Range Int
     -> Gen e
